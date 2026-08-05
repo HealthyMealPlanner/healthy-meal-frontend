@@ -1,7 +1,7 @@
 function App() {
   return (
-    <div>
-      <h1>Healthy Meal Planner</h1>
+    <div className="bg-primary text-white p-10 text-3xl">
+      Hello Tailwind
     </div>
   );
 }
