@@ -22,3 +22,25 @@
 body {
   font-family: "Plus Jakarta Sans", sans-serif;
 }
+
+
+@keyframes logoIntro {
+  0% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-logo {
+  animation: logoIntro 0.8s ease-out forwards;
+}
