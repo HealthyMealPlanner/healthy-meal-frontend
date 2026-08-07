@@ -8,7 +8,8 @@ import Button from "../../components/common/Button";
 import PasswordInput from "../../components/common/PasswordInput";
 import SocialButton from "../../components/common/SocialButton";
 import logo from "../../assets/images/logo.svg";
-// أو حسب اسم الملف عندك
+import { registerUser } from "../../services/authService";
+
 function Signup() {
   const navigate = useNavigate();
 
@@ -73,18 +74,40 @@ function Signup() {
     confirmPassword.length > 0 &&
     password === confirmPassword;
 
+  // Register user
+  const handleSignup = async () => {
+    if (!isNameValid || !isEmailValid || !passwordsMatch) {
+      return;
+    }
+
+    try {
+      const data = await registerUser({
+        fullName: name,
+        email: email,
+        password: password,
+        confirmPassword: confirmPassword,
+      });
+
+      console.log("Registration successful:", data);
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+    }
+  };
+
   return (
     <AuthLayout>
       <div className="w-full max-w-md px-4 sm:px-0">
 
-       {/* Logo */}
-<div className="mb-6 flex justify-center">
-  <img
-    src={logo}
-    alt="Healthy Meal Planner"
-    className="h-20 w-20 object-contain"
-  />
-</div>
+        {/* Logo */}
+        <div className="mb-6 flex justify-center">
+          <img
+            src={logo}
+            alt="Healthy Meal Planner"
+            className="h-20 w-20 object-contain"
+          />
+        </div>
 
         {/* Title */}
         <div className="text-center">
@@ -213,8 +236,9 @@ function Signup() {
 
           {/* Create Account */}
           <Button
-            type="submit"
+            type="button"
             className="h-14"
+            onClick={handleSignup}
           >
             Create Account
           </Button>

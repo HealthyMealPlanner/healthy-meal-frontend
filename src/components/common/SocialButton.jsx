@@ -1,3 +1,6 @@
+import { GoogleLogin } from "@react-oauth/google";
+import { googleLogin } from "../../services/authService";
+
 function GoogleIcon() {
   return (
     <svg
@@ -58,8 +61,66 @@ function FacebookIcon() {
 }
 
 function SocialButton({ provider }) {
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const idToken = credentialResponse?.credential;
+
+      if (!idToken) {
+        throw new Error("Google did not return an ID token");
+      }
+
+      const data = await googleLogin(idToken);
+
+      console.log("Google login successful:", data);
+
+      const token = data?.token || data?.accessToken;
+
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert(error.message || "Google login failed");
+    }
+  };
+
+  // =========================
+  // Google
+  // =========================
+  if (provider === "google") {
+    return (
+      <div className="relative flex h-14 flex-1 items-center justify-center">
+        {/* الشكل الأصلي للزر */}
+        <button
+          type="button"
+          className="flex h-14 w-full items-center justify-center rounded-xl bg-white shadow-sm transition hover:shadow-md"
+        >
+          <GoogleIcon />
+        </button>
+
+        {/* Google OAuth الحقيقي فوق الزر */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              console.error("Google Login Failed");
+            }}
+            theme="outline"
+            size="large"
+            shape="rectangular"
+            width="100%"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // Apple & Facebook
+  // =========================
   const icons = {
-    google: <GoogleIcon />,
     apple: <AppleIcon />,
     facebook: <FacebookIcon />,
   };

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserRound } from "lucide-react";
 
@@ -7,21 +8,58 @@ import Button from "../../components/common/Button";
 import PasswordInput from "../../components/common/PasswordInput";
 import SocialButton from "../../components/common/SocialButton";
 import logo from "../../assets/images/logo.svg";
+import { loginUser } from "../../services/authService";
+
 function Login() {
   const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await loginUser({
+        email,
+        password,
+      });
+
+      console.log("Login successful:", data);
+
+      const token = data?.token || data?.accessToken;
+
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+
+      navigate("/");
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthLayout>
       <div className="w-full max-w-md px-4 sm:px-0">
 
-      {/* Logo */}
-<div className="mb-6 flex justify-center">
-  <img
-    src={logo}
-    alt="Healthy Meal Planner"
-    className="h-20 w-20 object-contain"
-  />
-</div>
+        {/* Logo */}
+        <div className="mb-6 flex justify-center">
+          <img
+            src={logo}
+            alt="Healthy Meal Planner"
+            className="h-20 w-20 object-contain"
+          />
+        </div>
 
         {/* Welcome */}
         <div className="text-center">
@@ -54,8 +92,10 @@ function Login() {
         </div>
 
         {/* Login Form */}
-        <form className="mt-6">
-
+        <form
+          className="mt-6"
+          onSubmit={handleLogin}
+        >
           {/* Email */}
           <div className="relative">
             <UserRound
@@ -66,14 +106,26 @@ function Login() {
             <Input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="h-14 pl-11"
             />
           </div>
 
           {/* Password */}
           <div className="mt-5">
-            <PasswordInput />
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
+
+          {/* Error */}
+          {error && (
+            <p className="mt-3 text-sm text-red-500">
+              {error}
+            </p>
+          )}
 
           {/* Forgot Password */}
           <div className="mt-4 flex justify-end">
@@ -87,8 +139,12 @@ function Login() {
           </div>
 
           {/* Login Button */}
-          <Button type="submit" className="mt-6 h-14">
-            Login
+          <Button
+            type="submit"
+            className="mt-6 h-14"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
 
