@@ -1,10 +1,7 @@
-import AcuteIcon from "../assets/icons/acute.svg?react";
 import AvocadoIcon from "../assets/icons/avocado_bean.svg?react";
-import NotesIcon from "../assets/icons/clinical_notes.svg?react";
 import WashokuIcon from "../assets/icons/washoku.svg?react";
-
-
-
+import AcuteIcon from "../assets/icons/acute.svg?react";
+import NotesIcon from "../assets/icons/clinical_notes.svg?react";
 
 export const goalOptions = [
   {

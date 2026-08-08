@@ -8,25 +8,27 @@ function PreferenceCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[104px] w-[104px] flex-col items-center justify-center rounded-2xl border transition-all duration-300 ${
+      className={`flex min-h-[70px] w-full flex-col items-start justify-center rounded-[14px] border px-3 py-2.5 text-left transition-all duration-200 sm:min-h-[72px] ${
         selected
           ? "border-[#10B981] bg-white shadow-sm"
           : "border-[#E2E8F0] bg-white hover:border-[#10B981]"
       }`}
     >
       <div
-        className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-          selected ? "bg-[#D1FAE5]" : "bg-[#F8FAFC]"
+        className={`flex h-7 w-7 items-center justify-center rounded-full ${
+          selected ? "bg-[#D1FAE5]" : "bg-[#F1F5F9]"
         }`}
       >
-        <Icon
-          className={`h-6 w-6 transition-colors ${
-            selected ? "text-[#10B981]" : "text-[#94A3B8]"
-          }`}
-        />
+        {Icon && (
+          <Icon
+            className={`h-4 w-4 ${
+              selected ? "text-[#10B981]" : "text-[#94A3B8]"
+            }`}
+          />
+        )}
       </div>
 
-      <p className="mt-3 text-center text-[12px] font-medium text-[#0F172A]">
+      <p className="mt-1.5 text-[10px] font-medium leading-[13px] text-[#0F172A] sm:text-[11px]">
         {title}
       </p>
     </button>

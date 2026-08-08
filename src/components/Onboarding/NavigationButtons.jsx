@@ -6,44 +6,34 @@ function NavigationButtons({
   disabled,
 }) {
   return (
-    <div className="mt-6 flex justify-center">
-      {step === 1 ? (
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={disabled}
-          className={`w-[341px] h-[50px] rounded-[12px] text-[16px] font-bold transition-all duration-300 ${
-            disabled
-              ? "cursor-not-allowed bg-[#A7F3D0] text-white opacity-60"
-              : "bg-[#10B981] text-white hover:bg-[#059669]"
-          }`}
-        >
-          Continue
-        </button>
-      ) : (
-        <div className="flex w-[341px] gap-[13px]">
-          <button
-            type="button"
-            onClick={onBack}
-            className="w-[164px] h-[50px] rounded-[12px] border border-[#10B981] bg-white text-[16px] font-semibold text-[#10B981]"
-          >
-            Back
-          </button>
+    <div className="flex w-full items-center justify-between gap-4">
+      {/* Back */}
+      <button
+        type="button"
+        onClick={onBack}
+        disabled={step === 1}
+        className={`h-[32px] min-w-[100px] rounded-[8px] border px-4 text-[9px] font-medium transition-all sm:h-[34px] sm:min-w-[105px] sm:text-[10px] ${
+          step === 1
+            ? "cursor-not-allowed border-[#E2E8F0] text-[#CBD5E1]"
+            : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#10B981]"
+        }`}
+      >
+        ← Back
+      </button>
 
-          <button
-            type="button"
-            onClick={onNext}
-            disabled={disabled}
-            className={`w-[164px] h-[50px] rounded-[12px] text-[16px] font-bold ${
-              disabled
-                ? "cursor-not-allowed bg-[#A7F3D0] text-white opacity-60"
-                : "bg-[#10B981] text-white hover:bg-[#059669]"
-            }`}
-          >
-            {step === totalSteps ? "Done" : "Next"}
-          </button>
-        </div>
-      )}
+      {/* Next / Done */}
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={disabled}
+        className={`h-[32px] min-w-[108px] rounded-[8px] px-4 text-[9px] font-semibold transition-all sm:h-[34px] sm:min-w-[110px] sm:text-[10px] ${
+          disabled
+            ? "cursor-not-allowed bg-[#A7F3D0] text-white opacity-70"
+            : "bg-[#10B981] text-white shadow-sm hover:bg-[#059669]"
+        }`}
+      >
+        {step === totalSteps ? "Done" : "Continue"} →
+      </button>
     </div>
   );
 }
