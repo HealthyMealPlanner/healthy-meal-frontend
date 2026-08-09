@@ -10,6 +10,11 @@ import VerifyOTP from "../pages/auth/VerifyOTP";
 import NewPassword from "../pages/auth/NewPassword";
 import ResetSuccess from "../pages/auth/ResetSuccess";
 
+import RecipesList from "../pages/recipes/RecipesList";
+import RecipeDetails from "../pages/recipes/RecipeDetails";
+import CookingMode from "../pages/recipes/CookingMode";
+import RecipeComplete from "../pages/recipes/RecipeComplete";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -24,6 +29,12 @@ function AppRoutes() {
       <Route path="/verify-otp" element={<VerifyOTP />} />
       <Route path="/new-password" element={<NewPassword />} />
       <Route path="/reset-success" element={<ResetSuccess />} />
+
+      {/* Recipes */}
+      <Route path="/recipes" element={<RecipesList />} />
+      <Route path="/recipes/:id" element={<RecipeDetails />} />
+      <Route path="/recipes/:id/cook" element={<CookingMode />} />
+      <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
