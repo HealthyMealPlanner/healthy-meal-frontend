@@ -15,12 +15,21 @@ import RecipeDetails from "../pages/recipes/RecipeDetails";
 import CookingMode from "../pages/recipes/CookingMode";
 import RecipeComplete from "../pages/recipes/RecipeComplete";
 
+import Profile from "../pages/profile/Profile";
+
+import Home from "../pages/Home/Home";
+import Explore from "../pages/Explore/Explore";
+
 function AppRoutes() {
   return (
     <Routes>
       {/* Onboarding */}
       <Route path="/" element={<SplashScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
+
+      {/* Home & Explore */}
+      <Route path="/home" element={<Home />} />
+      <Route path="/explore" element={<Explore />} />
 
       {/* Authentication */}
       <Route path="/login" element={<Login />} />
@@ -35,6 +44,9 @@ function AppRoutes() {
       <Route path="/recipes/:id" element={<RecipeDetails />} />
       <Route path="/recipes/:id/cook" element={<CookingMode />} />
       <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+
+      {/* Profile */}
+      <Route path="/profile" element={<Profile />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
