@@ -1,23 +1,18 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import Explore from "./pages/Explore/Explore";
+import { BrowserRouter } from "react-router-dom";
+
 import Sidebar from "./components/layout/Sidebar/Sidebar";
 import TopHeader from "./components/layout/TopHeader/TopHeader";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="bg-main-bg min-h-screen">
-        <TopHeader />
-        <Sidebar />
+      <Sidebar />
+      <TopHeader />
 
-        <div className="lg:pl-[88px] lg:pt-[77px] bg-main-bg min-h-screen">
-          <div className="lg:px-12">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/explore" element={<Explore />} />
-            </Routes>
-          </div>
+      <div className="lg:pl-[88px] lg:pt-[77px] bg-main-bg min-h-screen">
+        <div className="lg:px-12">
+          <AppRoutes />
         </div>
       </div>
     </BrowserRouter>
