@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import ProgressBar from "../components/Onboarding/ProgressBar";
 import OptionCard from "../components/Onboarding/OptionCard";
@@ -11,12 +12,19 @@ import { goalOptions } from "../data/onboardingData";
 import { budgetOptions } from "../data/budgetData";
 
 function Onboarding() {
+  const navigate = useNavigate();
+
   const [step, setStep] = useState(1);
 
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedBudget, setSelectedBudget] = useState(null);
   const [selectedPreference, setSelectedPreference] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
+  // =========================
+  // Dietary Preferences
+  // =========================
   const handlePreference = (id) => {
     setSelectedPreference((prev) =>
       prev.includes(id)
@@ -25,27 +33,102 @@ function Onboarding() {
     );
   };
 
-  const handleNext = () => {
-    if (step === 1 && !selectedGoal) return;
-    if (step === 2 && !selectedBudget) return;
+  // =========================
+  // Complete Onboarding
+  // =========================
+  const handleCompleteOnboarding = () => {
+    if (loading) return;
 
-    if (step < 3) {
-      setStep((prev) => prev + 1);
-    } else {
-      console.log({
-        goal: selectedGoal,
-        budget: selectedBudget,
-        preferences: selectedPreference,
-      });
-    }
+    setLoading(true);
+
+    // Save onboarding data locally for now.
+    // We will send this data to the backend
+    // later when the onboarding endpoint is available.
+    const onboardingData = {
+      goal: selectedGoal,
+      budget: selectedBudget,
+      preferences: selectedPreference,
+    };
+
+    localStorage.setItem(
+      "onboardingData",
+      JSON.stringify(onboardingData)
+    );
+
+    // Mark onboarding as completed
+    localStorage.setItem(
+      "onboardingCompleted",
+      "true"
+    );
+
+    console.log(
+      "Onboarding completed successfully:",
+      onboardingData
+    );
+
+    // Go directly to Home
+    navigate("/home", {
+      replace: true,
+    });
+
+    setLoading(false);
   };
 
+  // =========================
+  // Next
+  // =========================
+  const handleNext = () => {
+    // Step 1 validation
+    if (step === 1 && !selectedGoal) {
+      return;
+    }
+
+    // Step 2 validation
+    if (step === 2 && !selectedBudget) {
+      return;
+    }
+
+    // Step 1 → Step 2
+    if (step < 3) {
+      setStep((prev) => prev + 1);
+      return;
+    }
+
+    // Step 3 → Home
+    handleCompleteOnboarding();
+  };
+
+  // =========================
+  // Back
+  // =========================
   const handleBack = () => {
+    if (loading) return;
+
     if (step > 1) {
       setStep((prev) => prev - 1);
     }
   };
 
+  // =========================
+  // Skip
+  // =========================
+  const handleSkip = () => {
+    if (loading) return;
+
+    // Mark onboarding as completed
+    localStorage.setItem(
+      "onboardingCompleted",
+      "true"
+    );
+
+    navigate("/home", {
+      replace: true,
+    });
+  };
+
+  // =========================
+  // Titles
+  // =========================
   const title =
     step === 1
       ? "What is your main goal with PureBite?"
@@ -53,6 +136,9 @@ function Onboarding() {
       ? "What’s your typical budget per meal?"
       : "What’s your dietary preference?";
 
+  // =========================
+  // Descriptions
+  // =========================
   const description =
     step === 1
       ? "We'll tailor your AI recipe and budget recommendations based on this."
@@ -60,14 +146,16 @@ function Onboarding() {
       ? "This sets the default cost threshold for AI meal suggestions."
       : "Select all that apply so the AI never suggests food you can't eat.";
 
+  // =========================
+  // Disable Next
+  // =========================
   const isDisabled =
+    loading ||
     (step === 1 && !selectedGoal) ||
     (step === 2 && !selectedBudget);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#EAF8EC] px-4 py-4 sm:px-6 sm:py-5 md:px-8">
-
-      {/* Main Container */}
       <div className="mx-auto w-full max-w-[820px]">
 
         {/* Header */}
@@ -83,7 +171,9 @@ function Onboarding() {
           {/* Skip */}
           <button
             type="button"
-            className="mt-1 text-[9px] font-semibold uppercase text-[#10B981] sm:text-[10px] md:text-[11px]"
+            onClick={handleSkip}
+            disabled={loading}
+            className="mt-1 text-[9px] font-semibold uppercase text-[#10B981] disabled:cursor-not-allowed disabled:opacity-50 sm:text-[10px] md:text-[11px]"
           >
             Skip
           </button>
@@ -128,7 +218,9 @@ function Onboarding() {
                     description={goal.description}
                     icon={goal.icon}
                     selected={selectedGoal === goal.id}
-                    onClick={() => setSelectedGoal(goal.id)}
+                    onClick={() =>
+                      setSelectedGoal(goal.id)
+                    }
                   />
                 ))}
               </div>
@@ -144,7 +236,9 @@ function Onboarding() {
                     description={budget.description}
                     icon={budget.icon}
                     selected={selectedBudget === budget.id}
-                    onClick={() => setSelectedBudget(budget.id)}
+                    onClick={() =>
+                      setSelectedBudget(budget.id)
+                    }
                   />
                 ))}
               </div>
@@ -171,6 +265,12 @@ function Onboarding() {
             disabled={isDisabled}
           />
 
+          {/* Saving message */}
+          {loading && (
+            <p className="mt-3 text-center text-xs text-[#10B981]">
+              Finishing onboarding...
+            </p>
+          )}
         </main>
       </div>
     </div>
