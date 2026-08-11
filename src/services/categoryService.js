@@ -1,5 +1,5 @@
 import apiClient from "./apiClient";
 
 export const categoryService = {
-  getAll: () => apiClient.get("/api/Categories"),
+  getAll: () => apiClient.get("/Categories"),
 };

@@ -13,7 +13,9 @@ function App() {
         <TopHeader />
         <Sidebar />
 
-        <div className="lg:pl-[88px] lg:pt-[77px] bg-main-bg min-h-screen">
+        {/* pb-20 clears the bottom nav on mobile, lg:pb-0 removes it on
+            desktop since the sidebar moves to the left there */}
+        <div className="lg:pl-[88px] lg:pt-[77px] pb-20 lg:pb-0 bg-main-bg min-h-screen">
           <div className="lg:px-12">
             <Routes>
               <Route path="/" element={<Home />} />
