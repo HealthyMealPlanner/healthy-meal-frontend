@@ -66,12 +66,10 @@ function Onboarding() {
       onboardingData
     );
 
-    // Go directly to Home
-    navigate("/home", {
+    // Go to Login after completing onboarding
+    navigate("/login", {
       replace: true,
     });
-
-    setLoading(false);
   };
 
   // =========================
@@ -94,7 +92,7 @@ function Onboarding() {
       return;
     }
 
-    // Step 3 → Home
+    // Step 3 → Login
     handleCompleteOnboarding();
   };
 
@@ -121,7 +119,8 @@ function Onboarding() {
       "true"
     );
 
-    navigate("/home", {
+    // Go to Login when skipping onboarding
+    navigate("/login", {
       replace: true,
     });
   };
