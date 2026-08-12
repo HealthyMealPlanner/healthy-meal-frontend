@@ -1,22 +1,19 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { HiOutlineHome } from "react-icons/hi2";
 import {
-  FaCompass,
-  FaUserMd,
   FaCog,
   FaQuestionCircle,
   FaInfoCircle,
   FaSignOutAlt,
   FaChevronRight,
+  FaUser,
 } from "react-icons/fa";
-import { RiChatAiLine } from "react-icons/ri";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Home", icon: HiOutlineHome, end: true },
-  { to: "/explore", label: "Explore", icon: FaCompass },
-  { to: "/chat-ai", label: "chatAI", icon: RiChatAiLine },
-  { to: "/dietitians", label: "Dietitians", icon: FaUserMd },
+  { to: "/home", label: "Home", iconSrc: "/solar_home-2-bold.svg", end: true },
+  { to: "/explore", label: "Explore", iconSrc: "/Group.svg" },
+  { to: "/chat-ai", label: "chatAI", iconSrc: "/ri_chat-ai-line.svg" },
+  { to: "/dietitians", label: "Dietitians", iconSrc: "/arcticons_doctor-care-anywhere.svg" },
 ];
 
 const MENU_ITEMS = [
@@ -38,7 +35,7 @@ function Sidebar() {
         bg-white border-t lg:border-t-0 lg:border-r border-gray-100"
     >
       <nav className="flex flex-row lg:flex-col items-center gap-1 lg:gap-3 w-full lg:w-full">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+        {NAV_ITEMS.map(({ to, label, iconSrc, end }) => (
           <NavLink
             key={label}
             to={to}
@@ -46,25 +43,43 @@ function Sidebar() {
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 flex-1 lg:w-full lg:flex-none py-2 lg:py-2.5 rounded-xl text-[10px] font-medium transition-colors ${
                 isActive
-                  ? "text-primary bg-primary-light/60"
+                  ? "bg-primary-light/60 text-primary"
                   : "text-slate hover:bg-light hover:text-text-primary"
               }`
             }
           >
-            <Icon size={19} />
+            <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" />
             {label}
           </NavLink>
         ))}
+
+        {/* Profile — mobile only, sits alongside the other nav icons.
+            Desktop shows the avatar+menu trigger below instead. */}
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `flex flex-col items-center gap-1 flex-1 lg:hidden py-2 rounded-xl text-[10px] font-medium transition-colors ${
+              isActive
+                ? "bg-primary-light/60 text-primary"
+                : "text-slate hover:bg-light hover:text-text-primary"
+            }`
+          }
+        >
+          <FaUser size={19} />
+          Profile
+        </NavLink>
       </nav>
 
-      {/* Profile trigger — desktop only; mobile keeps just the 4 nav icons */}
+      {/* Profile trigger — desktop only */}
       <div className="hidden lg:block relative">
         {profileOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
             <div className="absolute bottom-16 left-0 z-50 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
               <div className="flex items-center gap-3 px-2 py-2.5 mb-1">
-                <div className="w-10 h-10 rounded-full bg-primary shrink-0" />
+                <div className="w-10 h-10 rounded-full bg-primary shrink-0 flex items-center justify-center">
+                  <FaUser className="text-white" size={16} />
+                </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-text-primary truncate">
                     Sarah Ahmed Shalaby
@@ -105,7 +120,9 @@ function Sidebar() {
           onClick={() => setProfileOpen((v) => !v)}
           className="relative z-50 flex items-center gap-3 rounded-xl p-1 hover:bg-light transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-primary ring-2 ring-white" />
+          <div className="w-10 h-10 rounded-full bg-primary ring-2 ring-white flex items-center justify-center">
+            <FaUser className="text-white" size={16} />
+          </div>
         </button>
       </div>
     </aside>

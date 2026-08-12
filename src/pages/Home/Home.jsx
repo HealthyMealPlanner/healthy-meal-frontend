@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import Header from "../../components/ui/Header/Header";
 import SearchBar from "../../components/ui/SearchBar/SearchBar";
 import QuickActions from "../../components/ui/QuickActions/QuickActions";
@@ -7,43 +9,75 @@ import CategoryTabs from "../../components/ui/CategoryTabs/CategoryTabs";
 import DoctorCard from "../../components/ui/DoctorCard/DoctorCard";
 import UpcomingCard from "../../components/ui/UpcomingCard/UpcomingCard";
 import { useDoctors } from "../../hooks/useDoctors";
+import { getProfile } from "../../services/profileService";
 
 function Home() {
   const { doctors, loading, error } = useDoctors();
+  const [userName, setUserName] = useState("User");
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await getProfile();
+
+        const name =
+          profile?.fullName ||
+          profile?.FullName ||
+          profile?.name ||
+          profile?.Name;
+
+        if (name) {
+          setUserName(name);
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   return (
     <main className="min-h-screen bg-main-bg flex justify-center lg:block">
-      <div className="w-full max-w-[390px] lg:max-w-none min-h-screen px-4 py-6 lg:px-10 lg:py-8">
-        <div className="lg:hidden mb-6">
+      <div className="w-full max-w-[390px] lg:max-w-[1200px] lg:mx-auto min-h-screen px-4 py-6 lg:px-0 lg:py-8">
+        {/* Mobile Header */}
+        <div className="lg:hidden">
           <Header />
           <SearchBar />
         </div>
 
         <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6">
           <div>
+            {/* Desktop Welcome */}
             <div className="hidden lg:block mb-8">
               <h1 className="text-[44px] leading-tight font-bold text-text-primary mb-2">
-                Hello, <span className="text-primary">Sara</span>
+                Hello, <span className="text-primary">{userName}</span>
               </h1>
+
               <p className="text-slate text-lg">Ready for a healthier day</p>
             </div>
 
             <h2 className="hidden lg:block text-lg font-semibold text-text-primary mb-4">
               What would you like to do?
             </h2>
+
             <QuickActions />
           </div>
+
           <UpcomingCard />
         </div>
 
         <TodayCard />
+
         <ConsultationBanner />
+
         <CategoryTabs />
 
         <div className="lg:flex lg:items-center lg:justify-between lg:mb-4">
           <h2 className="hidden lg:block text-lg font-semibold text-text-primary">
             Recommended Doctors for you
           </h2>
+
           <button className="hidden lg:block text-sm font-semibold text-primary hover:underline">
             see more
           </button>

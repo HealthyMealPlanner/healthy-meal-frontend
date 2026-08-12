@@ -39,7 +39,9 @@ function Login() {
         localStorage.setItem("token", token);
       }
 
-      navigate("/");
+      // Existing user:
+      // Login → Home directly
+      navigate("/home", { replace: true });
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message || "Login failed");

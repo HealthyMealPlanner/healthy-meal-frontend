@@ -1,6 +1,33 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
 // =========================
+// Helper
+// =========================
+const parseResponse = async (response, defaultMessage) => {
+  const text = await response.text();
+
+  let data = null;
+
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = null;
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        data?.title ||
+        defaultMessage
+    );
+  }
+
+  return data;
+};
+
+// =========================
 // Register
 // =========================
 export const registerUser = async (userData) => {
@@ -12,13 +39,7 @@ export const registerUser = async (userData) => {
     body: JSON.stringify(userData),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Registration failed");
-  }
-
-  return data;
+  return parseResponse(response, "Registration failed");
 };
 
 // =========================
@@ -33,11 +54,7 @@ export const loginUser = async (loginData) => {
     body: JSON.stringify(loginData),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Login failed");
-  }
+  const data = await parseResponse(response, "Login failed");
 
   return data;
 };
@@ -46,47 +63,47 @@ export const loginUser = async (loginData) => {
 // Forgot Password
 // =========================
 export const forgotPassword = async (email) => {
-  const response = await fetch(`${API_URL}/api/Auth/forgot-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email.trim(),
-    }),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/forgot-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+      }),
+    }
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to send reset code");
-  }
-
-  return data;
+  return parseResponse(
+    response,
+    "Failed to send reset code"
+  );
 };
 
 // =========================
 // Verify OTP
 // =========================
 export const verifyOTP = async (email, otp) => {
-  const response = await fetch(`${API_URL}/api/Auth/verify-otp`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email.trim(),
-      otp: otp.trim(),
-    }),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/verify-otp`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+        otp: otp.trim(),
+      }),
+    }
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Invalid verification code");
-  }
-
-  return data;
+  return parseResponse(
+    response,
+    "Invalid verification code"
+  );
 };
 
 // =========================
@@ -98,46 +115,47 @@ export const resetPassword = async (
   newPassword,
   confirmNewPassword
 ) => {
-  const response = await fetch(`${API_URL}/api/Auth/reset-password`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: email.trim(),
-      otp: otp.trim(),
-      newPassword,
-      confirmNewPassword,
-    }),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/reset-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+        otp: otp.trim(),
+        newPassword,
+        confirmNewPassword,
+      }),
+    }
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to reset password");
-  }
-
-  return data;
+  return parseResponse(
+    response,
+    "Failed to reset password"
+  );
 };
+
 // =========================
 // Google Login
 // =========================
 export const googleLogin = async (idToken) => {
-  const response = await fetch(`${API_URL}/api/Auth/google-login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      idToken,
-    }),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/google-login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        idToken,
+      }),
+    }
+  );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Google login failed");
-  }
-
-  return data;
+  return parseResponse(
+    response,
+    "Google login failed"
+  );
 };

@@ -18,33 +18,47 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Name validation
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // =========================
+  // Validation
+  // =========================
+
   const isNameValid = name.trim().length > 0;
 
-  // Email validation
   const isEmailValid =
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+
+  const isPasswordValid =
+    hasMinLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasNumber &&
+    hasSpecialChar;
+
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
+
+  // =========================
   // Password strength
-  const getPasswordStrength = (password) => {
+  // =========================
+
+  const getPasswordStrength = () => {
     if (!password) {
       return null;
     }
 
-    if (password.length < 6) {
-      return {
-        label: "Too weak",
-        color: "text-red-500",
-        dot: "bg-red-500",
-      };
-    }
-
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
-
     const score = [
+      hasMinLength,
       hasUppercase,
       hasLowercase,
       hasNumber,
@@ -53,8 +67,16 @@ function Signup() {
 
     if (score <= 2) {
       return {
+        label: "Too weak",
+        color: "text-red-500",
+        dot: "bg-red-500",
+      };
+    }
+
+    if (score <= 4) {
+      return {
         label: "Good, but could be stronger",
-        color: "text-slate",
+        color: "text-yellow-600",
         dot: "bg-yellow-400",
       };
     }
@@ -66,40 +88,84 @@ function Signup() {
     };
   };
 
-  const passwordStrength = getPasswordStrength(password);
+  const passwordStrength = getPasswordStrength();
 
-  // Confirm password validation
-  const passwordsMatch =
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    password === confirmPassword;
+  // =========================
+  // Handle Signup
+  // =========================
 
-  // Register user
   const handleSignup = async () => {
-    if (!isNameValid || !isEmailValid || !passwordsMatch) {
+    setError("");
+
+    if (!isNameValid) {
+      setError("Please enter your name.");
+      return;
+    }
+
+    if (!isEmailValid) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!isPasswordValid) {
+      setError(
+        "Password must be at least 8 characters and include an uppercase letter, a number, and a special character."
+      );
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setError("Passwords do not match.");
       return;
     }
 
     try {
+      setLoading(true);
+
       const data = await registerUser({
-        fullName: name,
-        email: email,
-        password: password,
-        confirmPassword: confirmPassword,
+        fullName: name.trim(),
+        email: email.trim(),
+        password,
+        confirmPassword,
       });
 
       console.log("Registration successful:", data);
 
-      navigate("/login");
+      // ==========================================
+      // Save token if registration API returns it
+      // ==========================================
+
+      const token =
+        data?.token ||
+        data?.accessToken ||
+        data?.data?.token ||
+        data?.data?.accessToken;
+
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+
+      // ==========================================
+      // New Account Flow
+      // Signup → Onboarding → Home
+      // ==========================================
+
+      navigate("/");
     } catch (error) {
       console.error("Registration error:", error);
+
+      setError(
+        error?.message ||
+          "Registration failed. Please check your information and try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AuthLayout>
       <div className="w-full max-w-md px-4 sm:px-0">
-
         {/* Logo */}
         <div className="mb-6 flex justify-center">
           <img
@@ -140,9 +206,20 @@ function Signup() {
           </button>
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+            <AlertCircle
+              size={18}
+              className="mt-0.5 shrink-0"
+            />
+
+            <p>{error}</p>
+          </div>
+        )}
+
         {/* Form */}
         <div className="mt-6 space-y-4">
-
           {/* Name */}
           <div className="relative">
             <UserRound
@@ -154,7 +231,10 @@ function Signup() {
               type="text"
               placeholder="Enter your name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setError("");
+              }}
               className="h-14 pl-11 pr-11"
             />
 
@@ -177,7 +257,10 @@ function Signup() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               className="h-14 pl-11 pr-11"
             />
 
@@ -194,7 +277,10 @@ function Signup() {
             <PasswordInput
               placeholder="Enter your password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
             />
 
             {passwordStrength && (
@@ -208,6 +294,31 @@ function Signup() {
                 {passwordStrength.label}
               </p>
             )}
+
+            {/* Password requirements */}
+            {password.length > 0 && (
+              <div className="mt-2 space-y-1 text-[10px]">
+                <PasswordRequirement
+                  valid={hasMinLength}
+                  text="At least 8 characters"
+                />
+
+                <PasswordRequirement
+                  valid={hasUppercase}
+                  text="At least one uppercase letter"
+                />
+
+                <PasswordRequirement
+                  valid={hasNumber}
+                  text="At least one number"
+                />
+
+                <PasswordRequirement
+                  valid={hasSpecialChar}
+                  text="At least one special character"
+                />
+              </div>
+            )}
           </div>
 
           {/* Confirm Password */}
@@ -216,7 +327,10 @@ function Signup() {
               label="Confirm Password"
               placeholder="Confirm your password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError("");
+              }}
             />
 
             {confirmPassword.length > 0 && !passwordsMatch && (
@@ -239,8 +353,9 @@ function Signup() {
             type="button"
             className="h-14"
             onClick={handleSignup}
+            disabled={loading}
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
         </div>
 
@@ -273,9 +388,28 @@ function Signup() {
             Login
           </button>
         </p>
-
       </div>
     </AuthLayout>
+  );
+}
+
+function PasswordRequirement({ valid, text }) {
+  return (
+    <div
+      className={`flex items-center gap-1.5 ${
+        valid ? "text-primary" : "text-slate"
+      }`}
+    >
+      <span
+        className={`flex h-3.5 w-3.5 items-center justify-center rounded-full ${
+          valid ? "bg-primary text-white" : "border border-slate/30"
+        }`}
+      >
+        {valid && <Check size={9} strokeWidth={3} />}
+      </span>
+
+      <span>{text}</span>
+    </div>
   );
 }
 

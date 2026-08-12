@@ -1,31 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home/Home";
-import Explore from "./pages/Explore/Explore";
-import ChatAI from "./pages/ChatAI/ChatAI";
-import RecipeDetail from "./pages/RecipeDetail/RecipeDetail";
-import Sidebar from "./components/layout/Sidebar/Sidebar";
-import TopHeader from "./components/layout/TopHeader/TopHeader";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="bg-main-bg min-h-screen">
-        <TopHeader />
-        <Sidebar />
-
-        {/* pb-20 clears the bottom nav on mobile, lg:pb-0 removes it on
-            desktop since the sidebar moves to the left there */}
-        <div className="lg:pl-[88px] lg:pt-[77px] pb-20 lg:pb-0 bg-main-bg min-h-screen">
-          <div className="lg:px-12">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/explore" element={<Explore />} />
-              <Route path="/chat-ai" element={<ChatAI />} />
-              <Route path="/recipe/:id" element={<RecipeDetail />} />
-            </Routes>
-          </div>
-        </div>
-      </div>
+      <AppRoutes />
     </BrowserRouter>
   );
 }
