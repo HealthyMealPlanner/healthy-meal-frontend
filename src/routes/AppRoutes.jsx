@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "../components/layout/MainLayout/MainLayout";
 
 import SplashScreen from "../pages/SplashScreen";
 import Onboarding from "../pages/Onboarding";
@@ -19,19 +20,16 @@ import Profile from "../pages/profile/Profile";
 
 import Home from "../pages/Home/Home";
 import Explore from "../pages/Explore/Explore";
+import ChatAI from "../pages/ChatAI/ChatAI";
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Onboarding */}
+      {/* Onboarding — full page, NO sidebar/topbar */}
       <Route path="/" element={<SplashScreen />} />
       <Route path="/onboarding" element={<Onboarding />} />
 
-      {/* Home & Explore */}
-      <Route path="/home" element={<Home />} />
-      <Route path="/explore" element={<Explore />} />
-
-      {/* Authentication */}
+      {/* Auth — full page, NO sidebar/topbar */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -39,14 +37,19 @@ function AppRoutes() {
       <Route path="/new-password" element={<NewPassword />} />
       <Route path="/reset-success" element={<ResetSuccess />} />
 
-      {/* Recipes */}
-      <Route path="/recipes" element={<RecipesList />} />
-      <Route path="/recipes/:id" element={<RecipeDetails />} />
-      <Route path="/recipes/:id/cook" element={<CookingMode />} />
-      <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+      {/* Everything below renders INSIDE MainLayout (sidebar + topbar) */}
+      <Route element={<MainLayout />}>
+        <Route path="/home" element={<Home />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/chat-ai" element={<ChatAI />} />
 
-      {/* Profile */}
-      <Route path="/profile" element={<Profile />} />
+        <Route path="/recipes" element={<RecipesList />} />
+        <Route path="/recipes/:id" element={<RecipeDetails />} />
+        <Route path="/recipes/:id/cook" element={<CookingMode />} />
+        <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+
+        <Route path="/profile" element={<Profile />} />
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
