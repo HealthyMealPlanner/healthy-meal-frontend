@@ -19,38 +19,39 @@ import Profile from "../pages/profile/Profile";
 
 import Home from "../pages/Home/Home";
 import Explore from "../pages/Explore/Explore";
-
+import ProtectedRoute from "./ProtectedRoute";
 function AppRoutes() {
   return (
     <Routes>
-      {/* Onboarding */}
-      <Route path="/" element={<SplashScreen />} />
-      <Route path="/onboarding" element={<Onboarding />} />
 
-      {/* Home & Explore */}
-      <Route path="/home" element={<Home />} />
-      <Route path="/explore" element={<Explore />} />
+  {/* Public */}
+  <Route path="/" element={<SplashScreen />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/signup" element={<Signup />} />
+  <Route path="/onboarding" element={<Onboarding />} />
 
-      {/* Authentication */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/verify-otp" element={<VerifyOTP />} />
-      <Route path="/new-password" element={<NewPassword />} />
-      <Route path="/reset-success" element={<ResetSuccess />} />
+  <Route path="/forgot-password" element={<ForgotPassword />} />
+  <Route path="/verify-otp" element={<VerifyOTP />} />
+  <Route path="/new-password" element={<NewPassword />} />
+  <Route path="/reset-success" element={<ResetSuccess />} />
 
-      {/* Recipes */}
-      <Route path="/recipes" element={<RecipesList />} />
-      <Route path="/recipes/:id" element={<RecipeDetails />} />
-      <Route path="/recipes/:id/cook" element={<CookingMode />} />
-      <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+  {/* Protected */}
+  <Route element={<ProtectedRoute />}>
+    <Route path="/home" element={<Home />} />
+    <Route path="/explore" element={<Explore />} />
 
-      {/* Profile */}
-      <Route path="/profile" element={<Profile />} />
+    <Route path="/recipes" element={<RecipesList />} />
+    <Route path="/recipes/:id" element={<RecipeDetails />} />
+    <Route path="/recipes/:id/cook" element={<CookingMode />} />
+    <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Route path="/profile" element={<Profile />} />
+  </Route>
+
+  {/* Fallback */}
+  <Route path="*" element={<Navigate to="/" replace />} />
+
+</Routes>
   );
 }
 
