@@ -8,6 +8,7 @@ import Pagination from "../../components/Recipes/Pagination";
 import Loader from "../../components/Recipes/Loader";
 import ErrorState from "../../components/Recipes/ErrorState";
 import EmptyState from "../../components/Recipes/EmptyState";
+
 const PAGE_SIZE = 10;
 
 function RecipesList() {
