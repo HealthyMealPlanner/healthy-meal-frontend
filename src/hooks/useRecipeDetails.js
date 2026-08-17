@@ -11,29 +11,43 @@ export function useRecipeDetails(id) {
     if (!id) {
       setRecipe(null);
       setLoading(false);
+      setError("Recipe ID is missing.");
       return;
     }
 
     let ignore = false;
 
-    async function load() {
+    async function loadRecipe() {
       setLoading(true);
       setError("");
 
       try {
         const data = await getRecipeById(id);
 
-        if (!ignore) {
-          setRecipe(data);
+        if (ignore) return;
+
+        /*
+         * In case the service returns:
+         * { data: {...} }
+         * instead of directly returning the recipe.
+         */
+        const recipeData = data?.data ?? data;
+
+        if (!recipeData) {
+          throw new Error("Recipe not found.");
         }
+
+        setRecipe(recipeData);
       } catch (err) {
-        if (!ignore) {
-          setRecipe(null);
-          setError(
-            err?.message ||
-              "Failed to load recipe details."
-          );
-        }
+        if (ignore) return;
+
+        console.error("Failed to fetch recipe:", err);
+
+        setRecipe(null);
+
+        setError(
+          err?.message || "Failed to load recipe details."
+        );
       } finally {
         if (!ignore) {
           setLoading(false);
@@ -41,7 +55,7 @@ export function useRecipeDetails(id) {
       }
     }
 
-    load();
+    loadRecipe();
 
     return () => {
       ignore = true;

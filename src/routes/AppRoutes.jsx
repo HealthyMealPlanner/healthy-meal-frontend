@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import AuthLayout from "../components/layout/AuthLayout";
+
 import SplashScreen from "../pages/SplashScreen";
 import Onboarding from "../pages/Onboarding";
 
@@ -31,10 +33,10 @@ function AppRoutes() {
       <Route path="/reset-success" element={<ResetSuccess />} />
 
       {/* Recipes */}
-      <Route path="/recipes" element={<RecipesList />} />
-      <Route path="/recipes/:id" element={<RecipeDetails />} />
-      <Route path="/recipes/:id/cook" element={<CookingMode />} />
-      <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+      <Route path="/recipes" element={    <AuthLayout><RecipesList /></AuthLayout>} />
+      <Route path="/recipes/:id" element={    <AuthLayout><RecipeDetails /></AuthLayout>} />
+      <Route path="/recipes/:id/cook" element={    <AuthLayout><CookingMode /></AuthLayout>} />
+      <Route path="/recipes/:id/complete" element={    <AuthLayout><RecipeComplete /></AuthLayout>} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
