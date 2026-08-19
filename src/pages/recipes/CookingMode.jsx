@@ -53,6 +53,68 @@ function getYoutubeEmbedUrl(url) {
   }
 }
 
+// ========================================
+// Defensive helpers for optional step fields.
+// The current API always provides `stepNumber`, `instruction`,
+// `ingredients` and `tip` on a step (see useRecipeDetails/recipeService).
+// These helpers only render extra Figma-style details (a step title, a
+// duration badge, or selectable choices) when the API response actually
+// contains that data — nothing here is fabricated or hardcoded.
+// ========================================
+function getStepTitle(step, index) {
+  return (
+    step?.title ||
+    step?.name ||
+    step?.stepTitle ||
+    `Step ${step?.stepNumber ?? index + 1}`
+  );
+}
+
+function getStepDuration(step) {
+  return (
+    step?.durationMinutes ??
+    step?.timeMinutes ??
+    step?.duration ??
+    null
+  );
+}
+
+// Multiple-choice options for a step, e.g. alternative ingredients or
+// techniques. Only used if the API actually returns an array for one of
+// these field names — never invented.
+function getStepOptions(step) {
+  const options = step?.options ?? step?.choices ?? step?.alternatives;
+  return Array.isArray(options) ? options : [];
+}
+
+function getOptionLabel(option, index) {
+  return (
+    (typeof option === "string" ? option : null) ??
+    option?.label ??
+    option?.name ??
+    option?.title ??
+    `Option ${index + 1}`
+  );
+}
+
+function getOptionId(option, index) {
+  return option?.id ?? option?.value ?? `option-${index}`;
+}
+
+// The API currently returns `instruction` as a single string per step.
+// Some steps encode multiple actions in that string separated by line
+// breaks — when that's the case we render them as a numbered list (as in
+// the Figma design); a single-line instruction still renders as plain
+// text exactly as before.
+function getInstructionLines(instruction) {
+  if (!instruction) return [];
+
+  return String(instruction)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 function CookingMode() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,13 +129,27 @@ function CookingMode() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [checkedIngredients, setCheckedIngredients] =
     useState({});
+  // Keyed by step index so a choice made on an earlier step isn't lost
+  // when navigating back to it.
+  const [selectedOptionByStep, setSelectedOptionByStep] = useState({});
+  // Toggles the single media area between the image thumbnail (with a
+  // play button) and the embedded video, so there is only ever ONE
+  // video/media area on screen at a time.
+  const [showVideo, setShowVideo] = useState(false);
 
   // ========================================
   // API data
   // ========================================
-  const steps = Array.isArray(recipe?.steps)
+  // The Cooking Mode UI is a 5-step flow. We never fabricate steps: if
+  // the recipe has fewer than 5 real steps from the API, all of them are
+  // shown as-is (no padding). If it has more than 5, only the first 5
+  // real steps are shown (no fake content is created — every step shown
+  // is still real API data, just capped at 5).
+  const rawSteps = Array.isArray(recipe?.steps)
     ? recipe.steps
     : [];
+
+  const steps = rawSteps.slice(0, 5);
 
   const totalSteps = steps.length;
 
@@ -111,6 +187,21 @@ function CookingMode() {
         (gatheredCount / stepIngredients.length) * 100
       )
     : 0;
+
+  // ========================================
+  // Step title / duration / choices (only rendered when the API
+  // actually provides them — see helpers above)
+  // ========================================
+  const stepOptions = getStepOptions(step);
+  const selectedOptionId = selectedOptionByStep[currentIndex] ?? null;
+  const instructionLines = getInstructionLines(step?.instruction);
+
+  const selectOption = (optionId) => {
+    setSelectedOptionByStep((prev) => ({
+      ...prev,
+      [currentIndex]: optionId,
+    }));
+  };
 
   // ========================================
   // Loading
@@ -185,7 +276,7 @@ function CookingMode() {
   };
 
   return (
-    <div className="min-h-screen bg-main-bg font-jakarta pb-24 lg:ml-[88px] lg:pt-[77px]">
+    <div className="min-h-screen bg-main-bg font-jakarta pb-10 lg:ml-[88px] lg:pt-[77px]">
       <main className="mx-auto w-full max-w-[1120px] px-5 py-6 sm:px-8 lg:px-10">
         {/* ========================================
             Breadcrumb
@@ -219,8 +310,11 @@ function CookingMode() {
               LEFT COLUMN
           ======================================= */}
           <section>
-            {/* Recipe Image */}
-            {recipe.imageUrl && (
+            {/* Recipe Media — ONE area only: shows the image with a play
+                button when a video is available (tap to play it inline),
+                falls back to the embedded video directly if there's no
+                image, and to a placeholder if there's neither. */}
+            {recipe.imageUrl && !(showVideo && youtubeEmbedUrl) && (
               <div className="relative aspect-[1.45] w-full overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate/10">
                 <RecipeImage
                   src={recipe.imageUrl}
@@ -228,16 +322,10 @@ function CookingMode() {
                   className="h-full w-full object-cover"
                 />
 
-                {recipe.youtubeUrl && (
+                {youtubeEmbedUrl && (
                   <button
                     type="button"
-                    onClick={() =>
-                      window.open(
-                        recipe.youtubeUrl,
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
-                    }
+                    onClick={() => setShowVideo(true)}
                     className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition hover:scale-105"
                     aria-label="Play recipe video"
                   >
@@ -251,27 +339,23 @@ function CookingMode() {
               </div>
             )}
 
-            {/* No image message */}
-            {!recipe.imageUrl && (
+            {showVideo && youtubeEmbedUrl && (
+              <div className="aspect-[1.45] w-full overflow-hidden rounded-2xl bg-black shadow-sm">
+                <iframe
+                  src={youtubeEmbedUrl}
+                  title={`${recipe.name} video`}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            )}
+
+            {!recipe.imageUrl && !youtubeEmbedUrl && (
               <div className="flex aspect-[1.45] w-full items-center justify-center rounded-2xl bg-slate/5 ring-1 ring-slate/10">
                 <p className="text-sm text-slate">
                   No recipe image available
                 </p>
-              </div>
-            )}
-
-            {/* Embedded YouTube */}
-            {youtubeEmbedUrl && (
-              <div className="mt-4 overflow-hidden rounded-2xl bg-black shadow-sm">
-                <div className="aspect-video w-full">
-                  <iframe
-                    src={youtubeEmbedUrl}
-                    title={`${recipe.name} video`}
-                    className="h-full w-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                </div>
               </div>
             )}
 
@@ -288,6 +372,8 @@ function CookingMode() {
 
                   const isCompleted =
                     index < currentIndex;
+
+                  const itemDuration = getStepDuration(item);
 
                   return (
                     <button
@@ -324,8 +410,14 @@ function CookingMode() {
                             : "text-text-primary"
                         }`}
                       >
-                        Step {item.stepNumber ?? index + 1}
+                        {getStepTitle(item, index)}
                       </span>
+
+                      {itemDuration != null && (
+                        <span className="text-[10px] text-slate">
+                          {itemDuration} min
+                        </span>
+                      )}
 
                       <ChevronRight
                         size={12}
@@ -373,13 +465,13 @@ function CookingMode() {
                         </span>
 
                         <span
-                          className={`mt-1.5 text-[8px] ${
+                          className={`mt-1.5 max-w-[52px] truncate text-[8px] ${
                             isCurrent
                               ? "font-semibold text-primary"
                               : "text-slate"
                           }`}
                         >
-                          Step {item.stepNumber ?? index + 1}
+                          {getStepTitle(item, index)}
                         </span>
                       </div>
 
@@ -403,10 +495,12 @@ function CookingMode() {
               <p className="text-[10px] font-semibold uppercase tracking-wide text-slate">
                 Step {step.stepNumber ?? currentIndex + 1}{" "}
                 of {totalSteps}
+                {getStepDuration(step) != null &&
+                  ` · ~${getStepDuration(step)} min`}
               </p>
 
               <h1 className="mt-1 text-xl font-bold text-text-primary sm:text-2xl">
-                Step {step.stepNumber ?? currentIndex + 1}
+                {getStepTitle(step, currentIndex)}
               </h1>
             </div>
 
@@ -440,9 +534,58 @@ function CookingMode() {
                   Instructions
                 </p>
 
-                <p className="mt-3 text-sm leading-relaxed text-text-primary">
-                  {step.instruction}
+                {instructionLines.length > 1 ? (
+                  <ol className="mt-3 flex flex-col gap-2.5">
+                    {instructionLines.map((line, index) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2.5 text-sm leading-relaxed text-text-primary"
+                      >
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary-light text-[11px] font-semibold text-primary-dark">
+                          {index + 1}
+                        </span>
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="mt-3 text-sm leading-relaxed text-text-primary">
+                    {step.instruction}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Choices — only rendered when the API provides options for
+                this step (see getStepOptions). Nothing shown otherwise. */}
+            {stepOptions.length > 0 && (
+              <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate/10">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate">
+                  Choose an Option
                 </p>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {stepOptions.map((option, index) => {
+                    const optionId = getOptionId(option, index);
+                    const isSelected = selectedOptionId === optionId;
+
+                    return (
+                      <button
+                        key={optionId}
+                        type="button"
+                        onClick={() => selectOption(optionId)}
+                        aria-pressed={isSelected}
+                        className={`rounded-xl border px-3.5 py-2 text-sm font-medium transition ${
+                          isSelected
+                            ? "border-primary bg-primary-light text-primary-dark"
+                            : "border-slate/20 text-text-primary hover:bg-slate/5"
+                        }`}
+                      >
+                        {getOptionLabel(option, index)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -564,32 +707,28 @@ function CookingMode() {
                 </div>
               </div>
             )}
+
+            {/* Navigation */}
+            <div className="mt-6 flex gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={goBack}
+                disabled={currentIndex === 0}
+                className="flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Back
+              </Button>
+
+              <Button type="button" onClick={goNext} className="flex-1">
+                {currentIndex === totalSteps - 1
+                  ? "Finish"
+                  : "Next Step →"}
+              </Button>
+            </div>
           </section>
         </div>
       </main>
-
-      {/* Bottom Buttons */}
-      <div className="fixed bottom-6 right-8 z-20 flex gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={goBack}
-          disabled={currentIndex === 0}
-          className="h-10 w-[160px] text-xs disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Back
-        </Button>
-
-        <Button
-          type="button"
-          onClick={goNext}
-          className="h-10 w-[160px] text-xs"
-        >
-          {currentIndex === totalSteps - 1
-            ? "Finish"
-            : "Next Step →"}
-        </Button>
-      </div>
     </div>
   );
 }

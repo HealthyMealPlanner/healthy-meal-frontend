@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft,
   Bookmark,
   Check,
+  ChevronRight,
   Clock,
   Flame,
   Users,
@@ -150,6 +151,15 @@ const handleFavorite = async () => {
 
   return (
     <div className="min-h-screen bg-main-bg font-jakarta pb-28 lg:pb-10">
+      {/* Breadcrumb */}
+      <div className="mx-auto hidden max-w-6xl items-center gap-2 px-4 pt-6 text-xs text-slate sm:px-6 lg:flex lg:px-10 lg:pt-8">
+        <Link to="/" className="hover:text-text-primary">
+          Home
+        </Link>
+        <ChevronRight size={12} />
+        <span className="font-medium text-text-primary">Recipe</span>
+      </div>
+
       <div className="mx-auto max-w-6xl lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:gap-8 lg:px-10 lg:py-8">
 
         {/* =====================================
