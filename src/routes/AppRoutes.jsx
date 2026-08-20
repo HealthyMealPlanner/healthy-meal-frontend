@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import MainLayout from "../components/layout/MainLayout/MainLayout";
 
 import SplashScreen from "../pages/SplashScreen";
 import Onboarding from "../pages/Onboarding";
@@ -19,39 +20,100 @@ import Profile from "../pages/profile/Profile";
 
 import Home from "../pages/Home/Home";
 import Explore from "../pages/Explore/Explore";
+import ChatAI from "../pages/ChatAI/ChatAI";
+
 import ProtectedRoute from "./ProtectedRoute";
+
 function AppRoutes() {
   return (
     <Routes>
+      {/* =========================
+          Public Routes
+      ========================= */}
 
-  {/* Public */}
-  <Route path="/" element={<SplashScreen />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/signup" element={<Signup />} />
-  <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/" element={<SplashScreen />} />
 
-  <Route path="/forgot-password" element={<ForgotPassword />} />
-  <Route path="/verify-otp" element={<VerifyOTP />} />
-  <Route path="/new-password" element={<NewPassword />} />
-  <Route path="/reset-success" element={<ResetSuccess />} />
+      <Route path="/onboarding" element={<Onboarding />} />
 
-  {/* Protected */}
-  <Route element={<ProtectedRoute />}>
-    <Route path="/home" element={<Home />} />
-    <Route path="/explore" element={<Explore />} />
+      <Route path="/login" element={<Login />} />
 
-    <Route path="/recipes" element={<RecipesList />} />
-    <Route path="/recipes/:id" element={<RecipeDetails />} />
-    <Route path="/recipes/:id/cook" element={<CookingMode />} />
-    <Route path="/recipes/:id/complete" element={<RecipeComplete />} />
+      <Route path="/signup" element={<Signup />} />
 
-    <Route path="/profile" element={<Profile />} />
-  </Route>
+      <Route
+        path="/forgot-password"
+        element={<ForgotPassword />}
+      />
 
-  {/* Fallback */}
-  <Route path="*" element={<Navigate to="/" replace />} />
+      <Route
+        path="/verify-otp"
+        element={<VerifyOTP />}
+      />
 
-</Routes>
+      <Route
+        path="/new-password"
+        element={<NewPassword />}
+      />
+
+      <Route
+        path="/reset-success"
+        element={<ResetSuccess />}
+      />
+
+      {/* =========================
+          Protected Routes
+          MainLayout = Sidebar + TopHeader
+      ========================= */}
+
+      <Route element={<ProtectedRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<Home />} />
+
+          <Route
+            path="/explore"
+            element={<Explore />}
+          />
+
+          <Route
+            path="/chat-ai"
+            element={<ChatAI />}
+          />
+
+          <Route
+            path="/recipes"
+            element={<RecipesList />}
+          />
+
+          <Route
+            path="/recipes/:id"
+            element={<RecipeDetails />}
+          />
+
+          <Route
+            path="/recipes/:id/cook"
+            element={<CookingMode />}
+          />
+
+          <Route
+            path="/recipes/:id/complete"
+            element={<RecipeComplete />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+        </Route>
+      </Route>
+
+      {/* =========================
+          Fallback
+      ========================= */}
+
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+    </Routes>
   );
 }
 

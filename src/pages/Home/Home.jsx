@@ -8,57 +8,17 @@ import ConsultationBanner from "../../components/ui/ConsultationBanner/Consultat
 import CategoryTabs from "../../components/ui/CategoryTabs/CategoryTabs";
 import DoctorCard from "../../components/ui/DoctorCard/DoctorCard";
 import UpcomingCard from "../../components/ui/UpcomingCard/UpcomingCard";
-
+import { useDoctors } from "../../hooks/useDoctors";
 import { getProfile } from "../../services/profileService";
 
-const doctors = [
-  {
-    id: 1,
-    image: "/path/to/ahmed.jpg",
-    name: "Dr. Ahmed Mostafa",
-    specialty: "Clinical Nutrition & Diabetes Specialist",
-    price: 250,
-    rating: 4.9,
-    time: "7PM",
-  },
-  {
-    id: 2,
-    image: "/path/to/sarah.jpg",
-    name: "Dr. Sarah Ibrahim",
-    specialty: "Clinical Nutrition & Diabetes Specialist",
-    price: 200,
-    rating: 4.6,
-    time: "8PM",
-  },
-  {
-    id: 3,
-    image: "/path/to/ahmed-ali.jpg",
-    name: "Dr. Ahmed Ali",
-    specialty: "Clinical Nutrition & Diabetes Specialist",
-    price: 250,
-    rating: 4.9,
-    time: "7PM",
-  },
-  {
-    id: 4,
-    image: "/path/to/salma.jpg",
-    name: "Dr. Salma Hassan",
-    specialty: "Clinical Nutrition & Diabetes Specialist",
-    price: 250,
-    rating: 4.6,
-    time: "7PM",
-  },
-];
-
 function Home() {
+  const { doctors, loading, error } = useDoctors();
   const [userName, setUserName] = useState("User");
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const profile = await getProfile();
-
-        console.log("Home profile:", profile);
 
         const name =
           profile?.fullName ||
@@ -69,8 +29,8 @@ function Home() {
         if (name) {
           setUserName(name);
         }
-      } catch (error) {
-        console.error("Failed to load profile:", error);
+      } catch (err) {
+        console.error("Failed to load profile:", err);
       }
     };
 
@@ -80,7 +40,6 @@ function Home() {
   return (
     <main className="min-h-screen bg-main-bg flex justify-center lg:block">
       <div className="w-full max-w-[390px] lg:max-w-[1200px] lg:mx-auto min-h-screen px-4 py-6 lg:px-0 lg:py-8">
-
         {/* Mobile Header */}
         <div className="lg:hidden">
           <Header />
@@ -89,19 +48,13 @@ function Home() {
 
         <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6">
           <div>
-
             {/* Desktop Welcome */}
             <div className="hidden lg:block mb-8">
               <h1 className="text-[44px] leading-tight font-bold text-text-primary mb-2">
-                Hello,{" "}
-                <span className="text-primary">
-                  {userName}
-                </span>
+                Hello, <span className="text-primary">{userName}</span>
               </h1>
 
-              <p className="text-slate text-lg">
-                Ready for a healthier day
-              </p>
+              <p className="text-slate text-lg">Ready for a healthier day</p>
             </div>
 
             <h2 className="hidden lg:block text-lg font-semibold text-text-primary mb-4">
@@ -130,11 +83,21 @@ function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
-          {doctors.map((doc) => (
-            <DoctorCard key={doc.id} doctor={doc} />
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-sm text-slate">Loading doctors...</p>
+        ) : error ? (
+          <p className="text-sm text-red-500">
+            Couldn't load doctors right now. Please try again later.
+          </p>
+        ) : doctors.length === 0 ? (
+          <p className="text-sm text-slate">No doctors found.</p>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
+            {doctors.map((doctor) => (
+              <DoctorCard key={doctor.id} doctor={doctor} />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

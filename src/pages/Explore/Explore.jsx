@@ -4,6 +4,7 @@ import FilterSidebar from "../../components/ui/FilterSidebar/FilterSidebar";
 import ActiveFilterChips from "../../components/ui/ActiveFilterChips/ActiveFilterChips";
 import RecipeGridCard from "../../components/ui/RecipeGridCard/RecipeGridCard";
 import DoctorListCard from "../../components/ui/DoctorListCard/DoctorListCard";
+import { useDoctors } from "../../hooks/useDoctors";
 
 const TABS = [
   { key: "diet-plans", label: "Diet Plans" },
@@ -11,8 +12,7 @@ const TABS = [
   { key: "articles", label: "Articles" },
 ];
 
-// TODO: replace with real data — recipes can reuse /api/Recipes,
-// doctors need the Doctors API once it's ready.
+// TODO: replace with real /Recipes call using the same pattern as Home.
 const RECIPES = [
   { id: 1, title: "Honey Mustard Chicken Salad", calories: 320, time: 20, price: 45, image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?q=80&w=600&auto=format&fit=crop" },
   { id: 2, title: "Spiced Lentil & Spinach Stew", calories: 450, time: 25, price: 35, image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=600&auto=format&fit=crop" },
@@ -22,34 +22,10 @@ const RECIPES = [
   { id: 6, title: "Mediterranean Chickpea Salad", calories: 280, time: 15, price: 30, image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop" },
 ];
 
-const DOCTORS = [
-  {
-    id: 1,
-    name: "Dr. Ahmed Reda",
-    specialty: "Sports Dietian",
-    rating: 4.8,
-    experience: 12,
-    tags: ["Weight Mgmt", "Muscle Gain"],
-    nextAvailable: "Tomorrow, 10:00 AM",
-    fee: 110,
-    image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=200&auto=format&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Dr. Sarah Hassan",
-    specialty: "Clinical Nutritionist",
-    rating: 4.9,
-    experience: 8,
-    tags: ["Weight Mgmt", "Diabetes"],
-    nextAvailable: "Today, 2:30 PM",
-    fee: 85,
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop",
-  },
-];
-
 function Explore() {
   const [activeTab, setActiveTab] = useState("diet-plans");
   const [query, setQuery] = useState("");
+  const { doctors, loading: doctorsLoading, error: doctorsError } = useDoctors();
 
   const [filters, setFilters] = useState({
     budget: 300,
@@ -75,9 +51,7 @@ function Explore() {
   const chips = useMemo(() => {
     if (activeTab !== "doctors") return [];
     const list = [];
-    filters.specialties.forEach((s) =>
-      list.push({ key: `spec-${s}`, label: s })
-    );
+    filters.specialties.forEach((s) => list.push({ key: `spec-${s}`, label: s }));
     if (filters.calories < 800) list.push({ key: "kcal", label: `Under ${filters.calories}kcal` });
     if (filters.fee < 300) list.push({ key: "fee", label: `Under ${filters.fee}EGP` });
     return list;
@@ -141,22 +115,30 @@ function Explore() {
           <div>
             <ActiveFilterChips chips={chips} onRemove={removeChip} onClearAll={resetFilters} />
 
-            <p className="text-sm font-semibold text-primary mb-4">
-              {activeTab === "diet-plans" ? filteredRecipes.length : DOCTORS.length} results
-            </p>
-
             {activeTab === "diet-plans" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filteredRecipes.map((recipe) => (
-                  <RecipeGridCard key={recipe.id} recipe={recipe} />
-                ))}
-              </div>
+              <>
+                <p className="text-sm font-semibold text-primary mb-4">{filteredRecipes.length} results</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {filteredRecipes.map((recipe) => (
+                    <RecipeGridCard key={recipe.id} recipe={recipe} />
+                  ))}
+                </div>
+              </>
+            ) : doctorsLoading ? (
+              <p className="text-sm text-slate">Loading doctors...</p>
+            ) : doctorsError ? (
+              <p className="text-sm text-red-500">Couldn't load doctors.</p>
+            ) : doctors.length === 0 ? (
+              <p className="text-sm text-slate">No doctors found.</p>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                {DOCTORS.map((doctor) => (
-                  <DoctorListCard key={doctor.id} doctor={doctor} />
-                ))}
-              </div>
+              <>
+                <p className="text-sm font-semibold text-primary mb-4">{doctors.length} results</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                  {doctors.map((doctor) => (
+                    <DoctorListCard key={doctor.id} doctor={doctor} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
