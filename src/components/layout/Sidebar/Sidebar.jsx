@@ -41,32 +41,35 @@ function Sidebar() {
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 flex-1 lg:w-full lg:flex-none py-2 lg:py-2.5 rounded-xl text-[10px] font-medium transition-colors ${
+              `flex flex-col items-center gap-1 flex-1 lg:w-full lg:flex-none py-2 lg:py-2.5 rounded-xl text-[10px] font-semibold transition-colors ${
                 isActive
                   ? "bg-primary-light/60 text-primary"
-                  : "text-slate hover:bg-light hover:text-text-primary"
+                  : "text-slate/70 hover:text-text-primary"
               }`
             }
           >
-            <img src={iconSrc} alt={label} className="w-5 h-5 object-contain" />
+            <img src={iconSrc} alt={label} className="w-6 h-6 object-contain" />
             {label}
           </NavLink>
         ))}
 
-        {/* Profile — mobile only, sits alongside the other nav icons.
-            Desktop shows the avatar+menu trigger below instead. */}
+        {/* Profile — mobile only */}
         <NavLink
           to="/profile"
           className={({ isActive }) =>
-            `flex flex-col items-center gap-1 flex-1 lg:hidden py-2 rounded-xl text-[10px] font-medium transition-colors ${
+            `flex flex-col items-center gap-1 flex-1 lg:hidden py-2 rounded-xl text-[10px] font-semibold transition-colors ${
               isActive
                 ? "bg-primary-light/60 text-primary"
-                : "text-slate hover:bg-light hover:text-text-primary"
+                : "text-slate/70 hover:text-text-primary"
             }`
           }
         >
-          <FaUser size={19} />
-          Profile
+          {({ isActive }) => (
+            <>
+              <FaUser size={19} className={isActive ? "text-primary" : "text-slate/70"} />
+              Profile
+            </>
+          )}
         </NavLink>
       </nav>
 

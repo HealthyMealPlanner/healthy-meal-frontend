@@ -1,85 +1,38 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import FilterSidebar from "../../components/ui/FilterSidebar/FilterSidebar";
-import ActiveFilterChips from "../../components/ui/ActiveFilterChips/ActiveFilterChips";
 import RecipeGridCard from "../../components/ui/RecipeGridCard/RecipeGridCard";
-import DoctorListCard from "../../components/ui/DoctorListCard/DoctorListCard";
-import { useDoctors } from "../../hooks/useDoctors";
-
-const TABS = [
-  { key: "diet-plans", label: "Diet Plans" },
-  { key: "doctors", label: "Doctors" },
-  { key: "articles", label: "Articles" },
-];
-
-// TODO: replace with real /Recipes call using the same pattern as Home.
-const RECIPES = [
-  { id: 1, title: "Honey Mustard Chicken Salad", calories: 320, time: 20, price: 45, image: "https://images.unsplash.com/photo-1546793665-c74683f339c1?q=80&w=600&auto=format&fit=crop" },
-  { id: 2, title: "Spiced Lentil & Spinach Stew", calories: 450, time: 25, price: 35, image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=600&auto=format&fit=crop" },
-  { id: 3, title: "Classic Egyptian Koshary", calories: 580, time: 45, price: 22, image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=600&auto=format&fit=crop" },
-  { id: 4, title: "Stuffed Sweet Potatoes", calories: 390, time: 35, price: 28, image: "https://images.unsplash.com/photo-1584949091598-c31daaaa4aa9?q=80&w=600&auto=format&fit=crop" },
-  { id: 5, title: "Grilled Chicken & Quinoa Bowl", calories: 410, time: 30, price: 55, image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600&auto=format&fit=crop" },
-  { id: 6, title: "Mediterranean Chickpea Salad", calories: 280, time: 15, price: 30, image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop" },
-];
+import { useRecipes } from "../../hooks/useRecipes";
 
 function Explore() {
-  const [activeTab, setActiveTab] = useState("diet-plans");
   const [query, setQuery] = useState("");
-  const { doctors, loading: doctorsLoading, error: doctorsError } = useDoctors();
+  const [maxCalories, setMaxCalories] = useState(800);
 
-  const [filters, setFilters] = useState({
-    budget: 300,
-    calories: 800,
-    prepTime: ["15-30 min"],
-    fee: 300,
-    dateFrom: "",
-    dateTo: "",
-    specialties: ["Weight Mgmt", "Diabetes"],
+  const { recipes = [], loading, error, totalCount = 0 } = useRecipes(12);
+
+  const safeRecipes = Array.isArray(recipes) ? recipes : [];
+
+  const filteredRecipes = safeRecipes.filter((r) => {
+    if (!r) return false;
+    const matchesQuery =
+      query.trim() === "" ||
+      (r.title && r.title.toLowerCase().includes(query.toLowerCase())) ||
+      (r.name && r.name.toLowerCase().includes(query.toLowerCase()));
+    const matchesCalories = r.calories == null || r.calories <= maxCalories;
+    return matchesQuery && matchesCalories;
   });
 
-  const resetFilters = () =>
-    setFilters({
-      budget: 300,
-      calories: 800,
-      prepTime: [],
-      fee: 300,
-      dateFrom: "",
-      dateTo: "",
-      specialties: [],
-    });
-
-  const chips = useMemo(() => {
-    if (activeTab !== "doctors") return [];
-    const list = [];
-    filters.specialties.forEach((s) => list.push({ key: `spec-${s}`, label: s }));
-    if (filters.calories < 800) list.push({ key: "kcal", label: `Under ${filters.calories}kcal` });
-    if (filters.fee < 300) list.push({ key: "fee", label: `Under ${filters.fee}EGP` });
-    return list;
-  }, [activeTab, filters]);
-
-  const removeChip = (key) => {
-    if (key.startsWith("spec-")) {
-      const value = key.replace("spec-", "");
-      setFilters((f) => ({ ...f, specialties: f.specialties.filter((s) => s !== value) }));
-    } else if (key === "kcal") {
-      setFilters((f) => ({ ...f, calories: 800 }));
-    } else if (key === "fee") {
-      setFilters((f) => ({ ...f, fee: 300 }));
-    }
-  };
-
-  const filteredRecipes = RECIPES.filter(
-    (r) => r.price <= filters.budget && r.calories <= filters.calories
-  );
-
   return (
-    <div className="max-w-[1200px] mx-auto px-4 lg:px-0 py-6 lg:py-8">
-      <h1 className="text-3xl lg:text-[44px] font-bold text-text-primary mb-2">Explore</h1>
+    <div className="w-full max-w-[1200px] mx-auto px-4 lg:pl-[110px] lg:pr-6 py-6 lg:py-8">
+      <h1 className="text-3xl lg:text-[44px] font-bold text-text-primary mb-2">
+        Explore
+      </h1>
       <p className="text-slate text-base lg:text-lg mb-6">
         Discover meals, plans, and nutrition support tailored to your goals and budget.
       </p>
 
-      <div className="bg-white rounded-2xl shadow-sm px-5 py-4 flex items-center gap-3 mb-6">
+      {/* شريط البحث */}
+      <div className="bg-white rounded-2xl shadow-sm px-5 py-4 flex items-center gap-3 mb-8 border border-gray-100">
         <FaSearch className="text-slate shrink-0" />
         <input
           type="text"
@@ -90,59 +43,47 @@ function Explore() {
         />
       </div>
 
-      <div className="flex items-center gap-8 border-b border-gray-200 mb-6">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`pb-3 text-base font-semibold border-b-2 transition-colors ${
-              activeTab === tab.key
-                ? "text-primary border-primary"
-                : "text-slate border-transparent hover:text-text-primary"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <h2 className="text-lg font-semibold text-text-primary mb-4">
+        Diet Plans
+      </h2>
 
-      {activeTab === "articles" ? (
-        <p className="text-sm text-slate">Articles are coming soon.</p>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-          <FilterSidebar tab={activeTab} filters={filters} onChange={setFilters} onReset={resetFilters} />
-
-          <div>
-            <ActiveFilterChips chips={chips} onRemove={removeChip} onClearAll={resetFilters} />
-
-            {activeTab === "diet-plans" ? (
-              <>
-                <p className="text-sm font-semibold text-primary mb-4">{filteredRecipes.length} results</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {filteredRecipes.map((recipe) => (
-                    <RecipeGridCard key={recipe.id} recipe={recipe} />
-                  ))}
-                </div>
-              </>
-            ) : doctorsLoading ? (
-              <p className="text-sm text-slate">Loading doctors...</p>
-            ) : doctorsError ? (
-              <p className="text-sm text-red-500">Couldn't load doctors.</p>
-            ) : doctors.length === 0 ? (
-              <p className="text-sm text-slate">No doctors found.</p>
-            ) : (
-              <>
-                <p className="text-sm font-semibold text-primary mb-4">{doctors.length} results</p>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                  {doctors.map((doctor) => (
-                    <DoctorListCard key={doctor.id} doctor={doctor} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+      {/* التنسيق الجديد للشاشات الكبيرة */}
+      <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
+        {/* شريط الفلتر بعرض ثابت */}
+        <div className="w-full lg:w-[260px] shrink-0">
+          <FilterSidebar
+            maxCalories={maxCalories}
+            onChangeCalories={setMaxCalories}
+          />
         </div>
-      )}
+
+        {/* كروت الوجبات تأخذ باقي المساحة بالكامل */}
+        <div className="flex-1 w-full min-w-0">
+          {loading ? (
+            <p className="text-sm text-slate">Loading recipes...</p>
+          ) : error ? (
+            <p className="text-sm text-red-500">Couldn't load recipes.</p>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-[#00C07F] mb-4">
+                {filteredRecipes.length} of {totalCount} results
+              </p>
+
+              {filteredRecipes.length === 0 ? (
+                <p className="text-sm text-slate py-8 text-center">
+                  No recipes found matching your criteria.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 w-full">
+                  {filteredRecipes.map((recipe, index) => (
+                    <RecipeGridCard key={recipe?.id || index} recipe={recipe} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

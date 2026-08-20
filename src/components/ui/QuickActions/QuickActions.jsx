@@ -8,7 +8,7 @@ const actions = [
 
 function QuickActions() {
   return (
-    <div className="grid grid-cols-3 gap-3 lg:gap-4 mb-5 lg:mb-10">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4 mb-5 lg:mb-10">
       {actions.map((item) => (
         <button
           key={item.label}

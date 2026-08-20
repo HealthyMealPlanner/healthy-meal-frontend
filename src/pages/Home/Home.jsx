@@ -47,7 +47,7 @@ function Home() {
         </div>
 
         <div className="lg:grid lg:grid-cols-[1fr_360px] lg:gap-6">
-          <div>
+          <div className="mt-4 lg:mt-0">
             {/* Desktop Welcome */}
             <div className="hidden lg:block mb-8">
               <h1 className="text-[44px] leading-tight font-bold text-text-primary mb-2">

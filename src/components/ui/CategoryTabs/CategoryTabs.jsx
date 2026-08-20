@@ -18,14 +18,14 @@ function CategoryTabs() {
         Explore Nutrition Specialties
       </h2>
 
-      <div className="flex items-center justify-start gap-2">
+      <div className="grid grid-cols-2 lg:flex lg:items-center lg:justify-start gap-3 lg:gap-2">
         {categories.map((cat) => {
           const isActive = active === cat.label;
           return (
             <button
               key={cat.label}
               onClick={() => setActive(cat.label)}
-              className={`flex flex-col items-center justify-center gap-1 px-4 py-2.5 rounded-xl border-b-2 transition ${
+              className={`flex flex-col items-center justify-center gap-1 px-4 py-2.5 rounded-xl border-b-2 transition w-full lg:w-auto ${
                 isActive
                   ? "bg-white border-primary shadow-sm"
                   : "bg-transparent border-transparent hover:bg-white/60"
