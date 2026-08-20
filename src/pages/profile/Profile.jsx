@@ -19,70 +19,339 @@ function Profile() {
   const [activeTab, setActiveTab] = useState("Overview");
 
   // =========================
+  // Normalize Profile
+  // =========================
+  const normalizeProfile = (data) => {
+    if (!data) return null;
+
+    // =========================
+    // Image
+    // =========================
+    const image =
+      data.image ??
+      data.imageUrl ??
+      data.profilePictureUrl ??
+      data.profilePicture ??
+      data.profileImage ??
+      data.ProfileImage ??
+      null;
+
+    let normalizedImage = null;
+
+    if (image) {
+      // Already a complete data URL
+      if (
+        typeof image === "string" &&
+        image.startsWith("data:image/")
+      ) {
+        normalizedImage = image;
+      }
+
+      // Normal URL
+      else if (
+        typeof image === "string" &&
+        (
+          image.startsWith("http://") ||
+          image.startsWith("https://") ||
+          image.startsWith("/")
+        )
+      ) {
+        normalizedImage = image;
+      }
+
+      // Backend returned Base64
+      else if (typeof image === "string") {
+        normalizedImage =
+          `data:image/png;base64,${image}`;
+      }
+    }
+
+    return {
+      ...data,
+
+      // =========================
+      // Name
+      // =========================
+      name:
+        data.name ??
+        data.fullName ??
+        "",
+
+      fullName:
+        data.fullName ??
+        data.name ??
+        "",
+
+      // =========================
+      // Image
+      // =========================
+      profilePictureUrl: normalizedImage,
+
+      imageUrl: normalizedImage,
+
+      profileImage: normalizedImage,
+
+      // =========================
+      // Nutrition
+      // =========================
+      age: data.age ?? null,
+
+      gender: data.gender ?? null,
+
+      heightCm: data.heightCm ?? null,
+
+      weightKg: data.weightKg ?? null,
+
+      goal: data.goal ?? null,
+
+      dailyCaloriesGoal:
+        data.dailyCaloriesGoal ?? null,
+
+      allergies:
+        data.allergies ?? "",
+
+      // =========================
+      // Subscription
+      // =========================
+      subscriptionTier:
+        data.subscriptionTier ?? 0,
+
+      subscriptionExpiresAt:
+        data.subscriptionExpiresAt ?? null,
+    };
+  };
+
+  // =========================
   // Get Profile
   // =========================
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getProfile();
+
+      console.log("GET PROFILE:", data);
+
+      const normalized =
+        normalizeProfile(data);
+
+      console.log(
+        "NORMALIZED PROFILE:",
+        normalized
+      );
+
+      setProfile(normalized);
+    } catch (err) {
+      console.error(
+        "Profile error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to load profile"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================
+  // Load Profile
+  // =========================
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getProfile();
-
-        setProfile(data);
-      } catch (err) {
-        console.error("Profile error:", err);
-
-        setError(
-          err.message || "Failed to load profile"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
   }, []);
 
   // =========================
   // Update Profile
   // =========================
-  const handleProfileUpdate = async (updatedProfile) => {
+  const handleProfileUpdate = async (
+    updatedProfile
+  ) => {
     try {
       setError("");
 
+      /*
+       * Keep existing values when needed.
+       * This prevents sending 0 accidentally
+       * and resetting saved backend values.
+       */
+
       const profileData = {
-        fullName: updatedProfile.name,
-        age: updatedProfile.age,
-        gender: updatedProfile.gender,
-        heightCm: updatedProfile.heightCm,
-        weightKg: updatedProfile.weightKg,
-        goal: updatedProfile.goal,
+        // =========================
+        // Personal
+        // =========================
+        fullName:
+          updatedProfile.name ??
+          updatedProfile.fullName ??
+          profile?.fullName ??
+          "",
+
+        // =========================
+        // Age
+        // =========================
+        age:
+          updatedProfile.age !== "" &&
+          updatedProfile.age != null
+            ? Number(updatedProfile.age)
+            : Number(profile?.age ?? 0),
+
+        // =========================
+        // Gender
+        // =========================
+        gender:
+          updatedProfile.gender !== "" &&
+          updatedProfile.gender != null
+            ? Number(
+                updatedProfile.gender
+              )
+            : Number(
+                profile?.gender ?? 0
+              ),
+
+        // =========================
+        // Height
+        // =========================
+        heightCm:
+          updatedProfile.heightCm !== "" &&
+          updatedProfile.heightCm != null
+            ? Number(
+                updatedProfile.heightCm
+              )
+            : Number(
+                profile?.heightCm ?? 0
+              ),
+
+        // =========================
+        // Weight
+        // =========================
+        weightKg:
+          updatedProfile.weightKg !== "" &&
+          updatedProfile.weightKg != null
+            ? Number(
+                updatedProfile.weightKg
+              )
+            : Number(
+                profile?.weightKg ?? 0
+              ),
+
+        // =========================
+        // Goal
+        // =========================
+        goal:
+          updatedProfile.goal !== "" &&
+          updatedProfile.goal != null
+            ? Number(
+                updatedProfile.goal
+              )
+            : Number(
+                profile?.goal ?? 0
+              ),
+
+        // =========================
+        // Daily Calories
+        // =========================
         dailyCaloriesGoal:
-          updatedProfile.dailyCaloriesGoal,
-        allergies: updatedProfile.allergies,
-        profilePictureUrl:
-          updatedProfile.profilePictureUrl,
+          updatedProfile.dailyCaloriesGoal !== "" &&
+          updatedProfile.dailyCaloriesGoal != null
+            ? Number(
+                updatedProfile.dailyCaloriesGoal
+              )
+            : Number(
+                profile?.dailyCaloriesGoal ?? 0
+              ),
+
+        // =========================
+        // Allergies
+        // =========================
+        allergies:
+          updatedProfile.allergies ??
+          profile?.allergies ??
+          "",
       };
 
-      await updateProfile(profileData);
+      // =========================
+      // Profile Picture
+      // =========================
+      /*
+       * Only send a picture when the user
+       * selected a NEW file.
+       *
+       * Do not send null.
+       */
+      if (
+        updatedProfile.profilePicture instanceof
+        File
+      ) {
+        profileData.profilePicture =
+          updatedProfile.profilePicture;
+      }
 
-      // Update the page immediately
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        ...updatedProfile,
-      }));
+      console.log(
+        "PROFILE DATA BEFORE UPDATE:",
+        profileData
+      );
+
+      // =========================
+      // PUT
+      // =========================
+      await updateProfile(
+        profileData
+      );
+
+      // =========================
+      // GET Fresh Profile
+      // =========================
+      const freshProfile =
+        await getProfile();
+
+      console.log(
+        "PROFILE AFTER UPDATE:",
+        freshProfile
+      );
+
+      // =========================
+      // Normalize Fresh Profile
+      // =========================
+      const normalizedProfile =
+        normalizeProfile(
+          freshProfile
+        );
+
+      console.log(
+        "NORMALIZED PROFILE AFTER UPDATE:",
+        normalizedProfile
+      );
+
+      // =========================
+      // Update Profile Page
+      // =========================
+      setProfile(
+        normalizedProfile
+      );
+
+      // =========================
+      // IMPORTANT:
+      // Tell Sidebar that profile changed
+      // =========================
+      window.dispatchEvent(
+        new Event("profileUpdated")
+      );
+
     } catch (err) {
-      console.error("Update profile error:", err);
+      console.error(
+        "Update profile error:",
+        err
+      );
 
       setError(
-        err.message || "Failed to update profile"
+        err?.message ||
+          "Failed to update profile"
       );
 
-      // Show error to user
-      alert(
-        err.message || "Failed to update profile"
-      );
+      throw err;
     }
   };
 
@@ -125,16 +394,19 @@ function Profile() {
 
   return (
     <main className="w-full">
+
       {/* =========================
           Profile Header
       ========================== */}
       <ProfileHeader
         profile={profile}
-        onProfileUpdate={handleProfileUpdate}
+        onProfileUpdate={
+          handleProfileUpdate
+        }
       />
 
       {/* =========================
-          Profile Tabs
+          Tabs
       ========================== */}
       <div className="mt-5">
         <ProfileTabs
@@ -144,15 +416,18 @@ function Profile() {
       </div>
 
       {/* =========================
-          Tab Content
+          Content
       ========================== */}
       <div className="mt-5">
+
         {/* =========================
             Overview
         ========================== */}
         {activeTab === "Overview" && (
           <>
-            <ProfileStats profile={profile} />
+            <ProfileStats
+              profile={profile}
+            />
 
             <div className="mt-5">
               <SubscriptionCard
@@ -188,7 +463,9 @@ function Profile() {
               </p>
 
               <p className="mt-2 text-sm font-semibold text-text-primary">
-                {profile.allergies || "None"}
+                {profile.allergies?.trim()
+                  ? profile.allergies
+                  : "None"}
               </p>
             </div>
           </section>
@@ -210,6 +487,7 @@ function Profile() {
             </div>
           </section>
         )}
+
       </div>
     </main>
   );

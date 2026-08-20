@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { UserRound, Mail, Check, AlertCircle } from "lucide-react";
 
@@ -8,10 +9,13 @@ import Button from "../../components/common/Button";
 import PasswordInput from "../../components/common/PasswordInput";
 import SocialButton from "../../components/common/SocialButton";
 import logo from "../../assets/images/logo.svg";
+
 import { registerUser } from "../../services/authService";
 
 function Signup() {
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,16 +29,28 @@ function Signup() {
   // Validation
   // =========================
 
-  const isNameValid = name.trim().length > 0;
+  const isNameValid =
+    name.trim().length > 0;
 
   const isEmailValid =
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email.trim()
+    );
 
-  const hasMinLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+  const hasMinLength =
+    password.length >= 8;
+
+  const hasUppercase =
+    /[A-Z]/.test(password);
+
+  const hasLowercase =
+    /[a-z]/.test(password);
+
+  const hasNumber =
+    /[0-9]/.test(password);
+
+  const hasSpecialChar =
+    /[^A-Za-z0-9]/.test(password);
 
   const isPasswordValid =
     hasMinLength &&
@@ -49,7 +65,7 @@ function Signup() {
     password === confirmPassword;
 
   // =========================
-  // Password strength
+  // Password Strength
   // =========================
 
   const getPasswordStrength = () => {
@@ -88,25 +104,31 @@ function Signup() {
     };
   };
 
-  const passwordStrength = getPasswordStrength();
+  const passwordStrength =
+    getPasswordStrength();
 
   // =========================
-  // Handle Signup
+  // Normal Signup
   // =========================
 
   const handleSignup = async () => {
     setError("");
 
+    // Name
     if (!isNameValid) {
       setError("Please enter your name.");
       return;
     }
 
+    // Email
     if (!isEmailValid) {
-      setError("Please enter a valid email address.");
+      setError(
+        "Please enter a valid email address."
+      );
       return;
     }
 
+    // Password
     if (!isPasswordValid) {
       setError(
         "Password must be at least 8 characters and include an uppercase letter, a number, and a special character."
@@ -114,8 +136,11 @@ function Signup() {
       return;
     }
 
+    // Confirm Password
     if (!passwordsMatch) {
-      setError("Passwords do not match.");
+      setError(
+        "Passwords do not match."
+      );
       return;
     }
 
@@ -129,11 +154,14 @@ function Signup() {
         confirmPassword,
       });
 
-      console.log("Registration successful:", data);
+      console.log(
+        "Registration successful:",
+        data
+      );
 
-      // ==========================================
-      // Save token if registration API returns it
-      // ==========================================
+      // =========================
+      // Get Token
+      // =========================
 
       const token =
         data?.token ||
@@ -141,18 +169,37 @@ function Signup() {
         data?.data?.token ||
         data?.data?.accessToken;
 
-      if (token) {
-        localStorage.setItem("token", token);
+      if (!token) {
+        throw new Error(
+          "Registration succeeded but no token was returned."
+        );
       }
 
-      // ==========================================
-      // New Account Flow
-      // Signup → Onboarding → Home
-      // ==========================================
+      // =========================
+      // Save Authentication
+      // =========================
 
-      navigate("/");
+      login(token);
+
+      // =========================
+      // Normal Signup Flow
+      // =========================
+      //
+      // Signup
+      //   ↓
+      // Onboarding
+      //   ↓
+      // Home
+
+      navigate("/onboarding", {
+        replace: true,
+      });
+
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error(
+        "Registration error:",
+        error
+      );
 
       setError(
         error?.message ||
@@ -163,9 +210,34 @@ function Signup() {
     }
   };
 
+  // =========================
+  // Google Signup
+  // =========================
+
+  const handleGoogleSuccess = () => {
+    // =========================
+    // Google Signup Flow
+    // =========================
+    //
+    // Google
+    //   ↓
+    // Backend
+    //   ↓
+    // Token
+    //   ↓
+    // Onboarding
+    //   ↓
+    // Home
+
+    navigate("/onboarding", {
+      replace: true,
+    });
+  };
+
   return (
     <AuthLayout>
       <div className="w-full max-w-md px-4 sm:px-0">
+
         {/* Logo */}
         <div className="mb-6 flex justify-center">
           <img
@@ -177,6 +249,7 @@ function Signup() {
 
         {/* Title */}
         <div className="text-center">
+
           <h1 className="text-2xl font-bold text-text-primary sm:text-3xl">
             Save Your Preferences
           </h1>
@@ -186,13 +259,17 @@ function Signup() {
             <br />
             budget, meal plans, and chat history.
           </p>
+
         </div>
 
         {/* Login / Create Account */}
         <div className="mt-8 flex rounded-xl bg-slate/10 p-1">
+
           <button
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() =>
+              navigate("/login")
+            }
             className="w-1/2 rounded-lg py-3 text-sm font-medium text-slate transition hover:text-text-primary"
           >
             Login
@@ -204,24 +281,29 @@ function Signup() {
           >
             Create Account
           </button>
+
         </div>
 
         {/* Error */}
         {error && (
           <div className="mt-4 flex items-start gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+
             <AlertCircle
               size={18}
               className="mt-0.5 shrink-0"
             />
 
             <p>{error}</p>
+
           </div>
         )}
 
         {/* Form */}
         <div className="mt-6 space-y-4">
+
           {/* Name */}
           <div className="relative">
+
             <UserRound
               size={18}
               className="absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate/40"
@@ -244,10 +326,12 @@ function Signup() {
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-primary"
               />
             )}
+
           </div>
 
           {/* Email */}
           <div className="relative">
+
             <Mail
               size={18}
               className="absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate/40"
@@ -270,10 +354,12 @@ function Signup() {
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-primary"
               />
             )}
+
           </div>
 
           {/* Password */}
           <div>
+
             <PasswordInput
               placeholder="Enter your password"
               value={password}
@@ -295,9 +381,10 @@ function Signup() {
               </p>
             )}
 
-            {/* Password requirements */}
+            {/* Password Requirements */}
             {password.length > 0 && (
               <div className="mt-2 space-y-1 text-[10px]">
+
                 <PasswordRequirement
                   valid={hasMinLength}
                   text="At least 8 characters"
@@ -317,35 +404,48 @@ function Signup() {
                   valid={hasSpecialChar}
                   text="At least one special character"
                 />
+
               </div>
             )}
+
           </div>
 
           {/* Confirm Password */}
           <div>
+
             <PasswordInput
               label="Confirm Password"
               placeholder="Confirm your password"
               value={confirmPassword}
               onChange={(e) => {
-                setConfirmPassword(e.target.value);
+                setConfirmPassword(
+                  e.target.value
+                );
                 setError("");
               }}
             />
 
-            {confirmPassword.length > 0 && !passwordsMatch && (
-              <p className="mt-1 flex items-center gap-1 text-[10px] text-red-500">
-                <AlertCircle size={11} />
-                Passwords do not match
-              </p>
-            )}
+            {confirmPassword.length > 0 &&
+              !passwordsMatch && (
+                <p className="mt-1 flex items-center gap-1 text-[10px] text-red-500">
+
+                  <AlertCircle size={11} />
+
+                  Passwords do not match
+
+                </p>
+              )}
 
             {passwordsMatch && (
               <p className="mt-1 flex items-center gap-1 text-[10px] text-primary">
+
                 <Check size={11} />
+
                 Passwords match
+
               </p>
             )}
+
           </div>
 
           {/* Create Account */}
@@ -355,12 +455,16 @@ function Signup() {
             onClick={handleSignup}
             disabled={loading}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading
+              ? "Creating Account..."
+              : "Create Account"}
           </Button>
+
         </div>
 
         {/* Divider */}
         <div className="my-6 flex items-center gap-4">
+
           <div className="h-px flex-1 bg-slate/20" />
 
           <span className="whitespace-nowrap text-sm text-slate">
@@ -368,47 +472,87 @@ function Signup() {
           </span>
 
           <div className="h-px flex-1 bg-slate/20" />
+
         </div>
 
         {/* Social */}
         <div className="flex gap-3 sm:gap-4">
-          <SocialButton provider="google" />
-          <SocialButton provider="apple" />
-          <SocialButton provider="facebook" />
+
+          <SocialButton
+            provider="google"
+            onGoogleSuccess={
+              handleGoogleSuccess
+            }
+          />
+
+          <SocialButton
+            provider="apple"
+          />
+
+          <SocialButton
+            provider="facebook"
+          />
+
         </div>
 
         {/* Login */}
         <p className="mt-5 pb-4 text-center text-sm text-slate">
+
           Already have an account?{" "}
+
           <button
             type="button"
-            onClick={() => navigate("/login")}
+            onClick={() =>
+              navigate("/login")
+            }
             className="font-medium text-primary underline underline-offset-2"
           >
             Login
           </button>
+
         </p>
+
       </div>
     </AuthLayout>
   );
 }
 
-function PasswordRequirement({ valid, text }) {
+// =========================
+// Password Requirement
+// =========================
+
+function PasswordRequirement({
+  valid,
+  text,
+}) {
   return (
     <div
       className={`flex items-center gap-1.5 ${
-        valid ? "text-primary" : "text-slate"
+        valid
+          ? "text-primary"
+          : "text-slate"
       }`}
     >
+
       <span
         className={`flex h-3.5 w-3.5 items-center justify-center rounded-full ${
-          valid ? "bg-primary text-white" : "border border-slate/30"
+          valid
+            ? "bg-primary text-white"
+            : "border border-slate/30"
         }`}
       >
-        {valid && <Check size={9} strokeWidth={3} />}
+
+        {valid && (
+          <Check
+            size={9}
+            strokeWidth={3}
+          />
+        )}
+
       </span>
 
       <span>{text}</span>
+
     </div>
   );
 }

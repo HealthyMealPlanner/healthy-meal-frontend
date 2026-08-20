@@ -12,7 +12,7 @@ function SplashScreen() {
     }, 1500);
 
     const navigateTimer = setTimeout(() => {
-      navigate("/onboarding");
+      navigate("/login");
     }, 2000);
 
     return () => {
@@ -22,7 +22,7 @@ function SplashScreen() {
   }, [navigate]);
 
   const handleClick = () => {
-    navigate("/onboarding");
+    navigate("/login");
   };
 
   return (

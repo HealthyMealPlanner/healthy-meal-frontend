@@ -31,64 +31,106 @@ export const updateProfile = async (profileData) => {
   try {
     const formData = new FormData();
 
-    if (profileData.fullName !== undefined) {
-      formData.append(
-        "FullName",
-        profileData.fullName
-      );
-    }
-
-    if (profileData.age !== undefined) {
-      formData.append(
-        "Age",
-        profileData.age
-      );
-    }
-
-    if (profileData.gender !== undefined) {
-      formData.append(
-        "Gender",
-        profileData.gender
-      );
-    }
-
-    if (profileData.heightCm !== undefined) {
-      formData.append(
-        "HeightCm",
-        profileData.heightCm
-      );
-    }
-
-    if (profileData.weightKg !== undefined) {
-      formData.append(
-        "WeightKg",
-        profileData.weightKg
-      );
-    }
-
-    if (profileData.goal !== undefined) {
-      formData.append(
-        "Goal",
-        profileData.goal
-      );
-    }
-
-    if (profileData.dailyCaloriesGoal !== undefined) {
-      formData.append(
-        "DailyCaloriesGoal",
-        profileData.dailyCaloriesGoal
-      );
-    }
-
+    // =========================
+    // Full Name
+    // =========================
     formData.append(
-      "Allergies",
-      profileData.allergies || ""
+      "FullName",
+      profileData.fullName ?? ""
     );
 
-    if (profileData.profilePictureUrl) {
+    // =========================
+    // Age
+    // Backend expects integer
+    // Never send null
+    // =========================
+    formData.append(
+      "Age",
+      String(profileData.age ?? 0)
+    );
+
+    // =========================
+    // Gender
+    // Backend expects integer
+    // Never send null
+    // =========================
+    formData.append(
+      "Gender",
+      String(profileData.gender ?? 0)
+    );
+
+    // =========================
+    // Height
+    // Backend expects double
+    // Never send null
+    // =========================
+    formData.append(
+      "HeightCm",
+      String(profileData.heightCm ?? 0)
+    );
+
+    // =========================
+    // Weight
+    // Backend expects double
+    // Never send null
+    // =========================
+    formData.append(
+      "WeightKg",
+      String(profileData.weightKg ?? 0)
+    );
+
+    // =========================
+    // Goal
+    // Backend expects integer
+    // Never send null
+    // =========================
+    formData.append(
+      "Goal",
+      String(profileData.goal ?? 0)
+    );
+
+    // =========================
+    // Daily Calories Goal
+    // Backend expects integer
+    // Never send null
+    // =========================
+    formData.append(
+      "DailyCaloriesGoal",
+      String(profileData.dailyCaloriesGoal ?? 0)
+    );
+
+    // =========================
+    // Allergies
+    // =========================
+    formData.append(
+      "Allergies",
+      profileData.allergies ?? ""
+    );
+
+    // =========================
+    // Profile Picture
+    // Only send it when user
+    // actually selected a new file
+    // =========================
+    if (
+      profileData.profilePicture instanceof File
+    ) {
       formData.append(
-        "ProfilePictureUrl",
-        profileData.profilePictureUrl
+        "ProfilePicture",
+        profileData.profilePicture
+      );
+    }
+
+    console.log(
+      "Updating profile with FormData:"
+    );
+
+    for (const [key, value] of formData.entries()) {
+      console.log(
+        key,
+        value instanceof File
+          ? value.name
+          : value
       );
     }
 
@@ -99,6 +141,11 @@ export const updateProfile = async (profileData) => {
 
     return response.data;
   } catch (error) {
+    console.error(
+      "Update profile API error:",
+      error.response?.data || error
+    );
+
     const message =
       error.response?.data?.message ||
       error.response?.data?.title ||
@@ -143,7 +190,9 @@ export const getFavoriteRecipes = async () => {
 // =========================
 // Delete Favorite Recipe
 // =========================
-export const deleteFavoriteRecipe = async (recipeId) => {
+export const deleteFavoriteRecipe = async (
+  recipeId
+) => {
   try {
     const response = await apiClient.delete(
       `/api/FavoriteRecipes?RecipeId=${recipeId}`

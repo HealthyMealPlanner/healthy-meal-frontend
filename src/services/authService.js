@@ -31,30 +31,42 @@ const parseResponse = async (response, defaultMessage) => {
 // Register
 // =========================
 export const registerUser = async (userData) => {
-  const response = await fetch(`${API_URL}/api/Auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userData),
+    }
+  );
 
-  return parseResponse(response, "Registration failed");
+  return parseResponse(
+    response,
+    "Registration failed"
+  );
 };
 
 // =========================
 // Login
 // =========================
 export const loginUser = async (loginData) => {
-  const response = await fetch(`${API_URL}/api/Auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(loginData),
-  });
+  const response = await fetch(
+    `${API_URL}/api/Auth/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginData),
+    }
+  );
 
-  const data = await parseResponse(response, "Login failed");
+  const data = await parseResponse(
+    response,
+    "Login failed"
+  );
 
   return data;
 };
@@ -158,4 +170,19 @@ export const googleLogin = async (idToken) => {
     response,
     "Google login failed"
   );
+};
+
+// =========================
+// Logout
+// =========================
+export const logoutUser = () => {
+  // Remove authentication token
+  localStorage.removeItem("token");
+
+  // Remove stored user/profile data if they exist
+  localStorage.removeItem("user");
+  localStorage.removeItem("profile");
+
+  // Redirect to login page
+  window.location.href = "/login";
 };
