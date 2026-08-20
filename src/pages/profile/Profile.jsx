@@ -32,6 +32,8 @@ function Profile() {
       data.imageUrl ??
       data.profilePictureUrl ??
       data.profilePicture ??
+      data.profileImage ??
+      data.ProfileImage ??
       null;
 
     let normalizedImage = null;
@@ -86,6 +88,8 @@ function Profile() {
       profilePictureUrl: normalizedImage,
 
       imageUrl: normalizedImage,
+
+      profileImage: normalizedImage,
 
       // =========================
       // Nutrition
@@ -321,9 +325,21 @@ function Profile() {
         normalizedProfile
       );
 
+      // =========================
+      // Update Profile Page
+      // =========================
       setProfile(
         normalizedProfile
       );
+
+      // =========================
+      // IMPORTANT:
+      // Tell Sidebar that profile changed
+      // =========================
+      window.dispatchEvent(
+        new Event("profileUpdated")
+      );
+
     } catch (err) {
       console.error(
         "Update profile error:",

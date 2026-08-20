@@ -60,63 +60,107 @@ const MENU_ITEMS = [
 
 function Sidebar() {
   const [profileOpen, setProfileOpen] = useState(false);
-
   const [userName, setUserName] = useState("User");
-
   const [profileImage, setProfileImage] = useState(null);
 
   // =========================
   // Load Profile
   // =========================
+  const loadProfile = async () => {
+    try {
+      const profile = await getProfile();
+
+      console.log("SIDEBAR PROFILE:", profile);
+
+      // =========================
+      // Get User Name
+      // =========================
+      const name =
+        profile?.fullName ||
+        profile?.FullName ||
+        profile?.name ||
+        profile?.Name;
+
+      if (name) {
+        setUserName(name);
+      }
+
+      // =========================
+      // Get Profile Image
+      // =========================
+      const image =
+        profile?.image ||
+        profile?.Image ||
+        profile?.profilePicture ||
+        profile?.ProfilePicture ||
+        profile?.profileImage ||
+        profile?.ProfileImage ||
+        null;
+
+      if (image) {
+        // Already has data:image prefix
+        if (image.startsWith("data:image")) {
+          setProfileImage(image);
+        } else {
+          // Backend returns Base64
+          setProfileImage(`data:image/jpeg;base64,${image}`);
+        }
+      } else {
+        // No image
+        setProfileImage(null);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load profile in Sidebar:",
+        error
+      );
+    }
+  };
+
+  // =========================
+  // Load Profile On Mount
+  // + Listen For Profile Updates
+  // =========================
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const profile = await getProfile();
+    loadProfile();
 
-        console.log("SIDEBAR PROFILE:", profile);
+    // Custom event from Profile page
+    const handleProfileUpdated = () => {
+      console.log("PROFILE UPDATED - RELOADING SIDEBAR");
+      loadProfile();
+    };
 
-        // =========================
-        // Get User Name
-        // =========================
-        const name =
-          profile?.fullName ||
-          profile?.FullName ||
-          profile?.name ||
-          profile?.Name;
+    window.addEventListener(
+      "profileUpdated",
+      handleProfileUpdated
+    );
 
-        if (name) {
-          setUserName(name);
-        }
-
-        // =========================
-        // Get Profile Image
-        // =========================
-        const image =
-          profile?.image ||
-          profile?.Image ||
-          profile?.profilePicture ||
-          profile?.ProfilePicture ||
-          null;
-
-        if (image) {
-          // Backend may return Base64 without data:image prefix
-          if (image.startsWith("data:image")) {
-            setProfileImage(image);
-          } else {
-            setProfileImage(
-              `data:image/jpeg;base64,${image}`
-            );
-          }
-        }
-      } catch (error) {
-        console.error(
-          "Failed to load profile in Sidebar:",
-          error
-        );
+    // Storage event
+    const handleStorageChange = (event) => {
+      if (
+        event.key === "profile" ||
+        event.key === "profileImage"
+      ) {
+        loadProfile();
       }
     };
 
-    loadProfile();
+    window.addEventListener(
+      "storage",
+      handleStorageChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        "profileUpdated",
+        handleProfileUpdated
+      );
+
+      window.removeEventListener(
+        "storage",
+        handleStorageChange
+      );
+    };
   }, []);
 
   // =========================
@@ -124,7 +168,6 @@ function Sidebar() {
   // =========================
   const handleLogout = () => {
     setProfileOpen(false);
-
     logoutUser();
   };
 
@@ -208,10 +251,9 @@ function Sidebar() {
         border-gray-100
       "
     >
-      {/* =====================================================
+      {/* =========================
           TOP NAVIGATION
-      ===================================================== */}
-
+      ========================= */}
       <nav
         className="
           flex
@@ -273,10 +315,9 @@ function Sidebar() {
           )
         )}
 
-        {/* =====================================================
+        {/* =========================
             PROFILE - MOBILE
-        ===================================================== */}
-
+        ========================= */}
         <NavLink
           to="/profile"
           className={({ isActive }) =>
@@ -318,30 +359,28 @@ function Sidebar() {
         </NavLink>
       </nav>
 
-      {/* =====================================================
+      {/* =========================
           DESKTOP PROFILE AREA
-      ===================================================== */}
-
+      ========================= */}
       <div className="hidden lg:block relative">
-        {/* ===================================================
-            PROFILE POPUP
-        =================================================== */}
 
+        {/* =========================
+            PROFILE POPUP
+        ========================= */}
         {profileOpen && (
           <>
             {/* Overlay */}
-
             <div
               className="fixed inset-0 z-40"
-              onClick={() => setProfileOpen(false)}
+              onClick={() =>
+                setProfileOpen(false)
+              }
             />
 
             {/* Popup */}
-
             <div
               className="
                 absolute
-
                 bottom-16
                 left-0
 
@@ -361,10 +400,7 @@ function Sidebar() {
                 p-2
               "
             >
-              {/* =========================================
-                  User Header
-              ========================================= */}
-
+              {/* User Header */}
               <NavLink
                 to="/profile"
                 onClick={() =>
@@ -410,14 +446,9 @@ function Sidebar() {
                 </div>
               </NavLink>
 
-              {/* Divider */}
-
               <div className="h-px bg-gray-100 my-1" />
 
-              {/* =========================================
-                  Menu Items
-              ========================================= */}
-
+              {/* Menu Items */}
               {MENU_ITEMS.map(
                 ({ label, icon: Icon }) => (
                   <button
@@ -459,14 +490,9 @@ function Sidebar() {
                 )
               )}
 
-              {/* Divider */}
-
               <div className="h-px bg-gray-100 my-1" />
 
-              {/* =========================================
-                  Logout
-              ========================================= */}
-
+              {/* Logout */}
               <button
                 type="button"
                 onClick={handleLogout}
@@ -504,10 +530,9 @@ function Sidebar() {
           </>
         )}
 
-        {/* ===================================================
+        {/* =========================
             DESKTOP PROFILE BUTTON
-        =================================================== */}
-
+        ========================= */}
         <button
           type="button"
           onClick={() =>
