@@ -4,59 +4,120 @@ import {
   Ruler,
   Target,
   HeartPulse,
+  CalendarDays,
+  UserRound,
 } from "lucide-react";
 
 function ProfileStats({ profile }) {
+  // =========================
+  // Goal
+  // =========================
   const getGoalName = (goal) => {
-    switch (goal) {
+    switch (Number(goal)) {
+      case 0:
+        return "Maintain Weight";
+
       case 1:
         return "Weight Loss";
+
       case 2:
         return "Weight Gain";
-      case 3:
-        return "Maintain Weight";
+
       default:
         return "Not set";
     }
   };
 
+  // =========================
+  // Gender
+  // =========================
+  const getGenderName = (gender) => {
+    switch (Number(gender)) {
+      case 0:
+        return "Male";
+
+      case 1:
+        return "Female";
+
+      default:
+        return "Not set";
+    }
+  };
+
+  const hasValue = (value) => {
+    return (
+      value !== null &&
+      value !== undefined &&
+      Number(value) > 0
+    );
+  };
+
   const stats = [
     {
       label: "Goal",
-      value: getGoalName(profile?.goal),
+      value:
+        profile?.goal !== null &&
+        profile?.goal !== undefined
+          ? getGoalName(profile.goal)
+          : "Not set",
       icon: Target,
     },
+
     {
       label: "Daily Calories",
-      value: profile?.dailyCaloriesGoal
+      value: hasValue(
+        profile?.dailyCaloriesGoal
+      )
         ? `${profile.dailyCaloriesGoal} kcal`
         : "Not set",
       icon: Flame,
     },
+
     {
       label: "Height",
-      value: profile?.heightCm
+      value: hasValue(profile?.heightCm)
         ? `${profile.heightCm} cm`
         : "Not set",
       icon: Ruler,
     },
+
     {
       label: "Weight",
-      value: profile?.weightKg
+      value: hasValue(profile?.weightKg)
         ? `${profile.weightKg} kg`
         : "Not set",
       icon: Scale,
+    },
+
+    {
+      label: "Age",
+      value: hasValue(profile?.age)
+        ? `${profile.age} years`
+        : "Not set",
+      icon: CalendarDays,
+    },
+
+    {
+      label: "Gender",
+      value:
+        profile?.gender !== null &&
+        profile?.gender !== undefined
+          ? getGenderName(profile.gender)
+          : "Not set",
+      icon: UserRound,
     },
   ];
 
   return (
     <section>
+      {/* Title */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-text-primary">
           My Nutrition Profile
         </h2>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -90,13 +151,15 @@ function ProfileStats({ profile }) {
           <HeartPulse size={17} />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <p className="text-xs text-slate">
             Allergies
           </p>
 
-          <p className="mt-1 text-sm font-semibold text-text-primary">
-            {profile?.allergies || "None"}
+          <p className="mt-1 truncate text-sm font-semibold text-text-primary">
+            {profile?.allergies?.trim()
+              ? profile.allergies
+              : "None"}
           </p>
         </div>
       </div>

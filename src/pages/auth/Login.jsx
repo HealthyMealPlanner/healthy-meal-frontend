@@ -1,3 +1,4 @@
+import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserRound } from "lucide-react";
@@ -8,10 +9,12 @@ import Button from "../../components/common/Button";
 import PasswordInput from "../../components/common/PasswordInput";
 import SocialButton from "../../components/common/SocialButton";
 import logo from "../../assets/images/logo.svg";
+
 import { loginUser } from "../../services/authService";
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +22,9 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // =========================
+  // Normal Login
+  // =========================
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -27,27 +33,59 @@ function Login() {
 
     try {
       const data = await loginUser({
-        email,
+        email: email.trim(),
         password,
       });
 
       console.log("Login successful:", data);
 
-      const token = data?.token || data?.accessToken;
+      // =========================
+      // Get Token
+      // =========================
+      const token =
+        data?.token ||
+        data?.accessToken ||
+        data?.data?.token ||
+        data?.data?.accessToken;
 
-      if (token) {
-        localStorage.setItem("token", token);
+      if (!token) {
+        throw new Error(
+          "Login succeeded but no token was returned."
+        );
       }
 
-      // Existing user:
-      // Login → Home directly
-      navigate("/home", { replace: true });
+      // =========================
+      // Save Authentication
+      // =========================
+      login(token);
+
+      // =========================
+      // Existing User Flow
+      // =========================
+      // Login → Home
+      navigate("/home", {
+        replace: true,
+      });
     } catch (error) {
       console.error("Login error:", error);
-      setError(error.message || "Login failed");
+
+      setError(
+        error?.message ||
+          "Login failed. Please check your email and password."
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  // =========================
+  // Google Login
+  // =========================
+  const handleGoogleSuccess = () => {
+    // Google Login → Home
+    navigate("/home", {
+      replace: true,
+    });
   };
 
   return (
@@ -77,6 +115,7 @@ function Login() {
 
         {/* Login / Create Account */}
         <div className="mt-8 flex rounded-xl bg-slate/10 p-1">
+
           <button
             type="button"
             className="w-1/2 rounded-lg bg-white py-3 text-sm font-medium text-text-primary shadow-sm"
@@ -91,6 +130,7 @@ function Login() {
           >
             Create Account
           </button>
+
         </div>
 
         {/* Login Form */}
@@ -98,6 +138,7 @@ function Login() {
           className="mt-6"
           onSubmit={handleLogin}
         >
+
           {/* Email */}
           <div className="relative">
             <UserRound
@@ -109,7 +150,10 @@ function Login() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
               className="h-14 pl-11"
             />
           </div>
@@ -118,7 +162,10 @@ function Login() {
           <div className="mt-5">
             <PasswordInput
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
             />
           </div>
 
@@ -133,7 +180,9 @@ function Login() {
           <div className="mt-4 flex justify-end">
             <button
               type="button"
-              onClick={() => navigate("/forgot-password")}
+              onClick={() =>
+                navigate("/forgot-password")
+              }
               className="text-sm font-medium text-primary"
             >
               Forgot Password?
@@ -146,12 +195,16 @@ function Login() {
             className="mt-6 h-14"
             disabled={loading}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? "Logging in..."
+              : "Login"}
           </Button>
+
         </form>
 
         {/* Divider */}
         <div className="my-7 flex items-center gap-4">
+
           <div className="h-px flex-1 bg-slate/20" />
 
           <span className="whitespace-nowrap text-sm text-slate">
@@ -159,18 +212,32 @@ function Login() {
           </span>
 
           <div className="h-px flex-1 bg-slate/20" />
+
         </div>
 
         {/* Social Buttons */}
         <div className="flex gap-3 sm:gap-4">
-          <SocialButton provider="google" />
-          <SocialButton provider="apple" />
-          <SocialButton provider="facebook" />
+
+          <SocialButton
+            provider="google"
+            onGoogleSuccess={handleGoogleSuccess}
+          />
+
+          <SocialButton
+            provider="apple"
+          />
+
+          <SocialButton
+            provider="facebook"
+          />
+
         </div>
 
         {/* Create Account */}
         <p className="mt-7 pb-4 text-center text-sm text-slate">
+
           Don't have an account?{" "}
+
           <button
             type="button"
             onClick={() => navigate("/signup")}
@@ -178,6 +245,7 @@ function Login() {
           >
             Create one
           </button>
+
         </p>
 
       </div>

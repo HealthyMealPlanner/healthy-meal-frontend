@@ -67,7 +67,7 @@ function Onboarding() {
     );
 
     // Go to Login after completing onboarding
-    navigate("/login", {
+    navigate("/home", {
       replace: true,
     });
   };
@@ -120,7 +120,7 @@ function Onboarding() {
     );
 
     // Go to Login when skipping onboarding
-    navigate("/login", {
+    navigate("/home", {
       replace: true,
     });
   };
