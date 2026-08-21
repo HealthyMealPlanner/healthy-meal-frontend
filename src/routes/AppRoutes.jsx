@@ -22,6 +22,8 @@ import DoctorProfile from "../pages/dietitians/DoctorProfile";
 import Payment from "../pages/dietitians/Payment";
 import AppointmentConfirmed from "../pages/dietitians/AppointmentConfirmed";
 
+import ProSubscription from "../pages/subscription/ProSubscription";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -43,11 +45,14 @@ function AppRoutes() {
       <Route path="/recipes/:id/cook" element={    <AuthLayout><CookingMode /></AuthLayout>} />
       <Route path="/recipes/:id/complete" element={    <AuthLayout><RecipeComplete /></AuthLayout>} />
 
-{/* Dietitians */}
+      {/* Dietitians */}
       <Route path="/dietitians" element={    <AuthLayout><DietitiansList /></AuthLayout>} />
       <Route path="/dietitians/:id" element={    <AuthLayout><DoctorProfile /></AuthLayout>} />
       <Route path="/dietitians/:id/payment" element={    <AuthLayout><Payment /></AuthLayout>} />
       <Route path="/dietitians/:id/confirmation" element={    <AuthLayout><AppointmentConfirmed /></AuthLayout>} />
+
+      {/* Subscription */}
+      <Route path="/subscription" element={    <AuthLayout><ProSubscription /></AuthLayout>} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

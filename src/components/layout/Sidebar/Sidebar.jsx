@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaCog,
   FaQuestionCircle,
   FaInfoCircle,
   FaSignOutAlt,
   FaChevronRight,
+  FaCrown,
 } from "react-icons/fa";
 
 const NAV_ITEMS = [
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
 ];
 
 const MENU_ITEMS = [
+  { label: "Upgrade to Pro", icon: FaCrown, to: "/subscription" },
   { label: "Settings", icon: FaCog },
   { label: "Help & Support", icon: FaQuestionCircle },
   { label: "About Us", icon: FaInfoCircle },
@@ -40,6 +42,7 @@ const MENU_ITEMS = [
 
 function Sidebar() {
   const [profileOpen, setProfileOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <aside className="hidden lg:flex flex-col items-center justify-between fixed top-[77px] left-0 z-40 w-[88px] h-[calc(100vh-77px)] py-8 px-2 bg-white border-r border-gray-100">
@@ -87,13 +90,22 @@ function Sidebar() {
 
               <div className="h-px bg-gray-100 my-1" />
 
-              {MENU_ITEMS.map(({ label, icon: Icon }) => (
+              {MENU_ITEMS.map(({ label, icon: Icon, to }) => (
                 <button
                   key={label}
+                  onClick={() => {
+                    if (to) {
+                      setProfileOpen(false);
+                      navigate(to);
+                    }
+                  }}
                   className="w-full flex items-center justify-between px-2 py-2.5 rounded-lg text-sm text-text-primary hover:bg-light transition-colors"
                 >
                   <span className="flex items-center gap-3">
-                    <Icon className="text-slate" size={15} />
+                    <Icon
+                      className={to ? "text-orange" : "text-slate"}
+                      size={15}
+                    />
                     {label}
                   </span>
                   <FaChevronRight className="text-slate text-xs" />
