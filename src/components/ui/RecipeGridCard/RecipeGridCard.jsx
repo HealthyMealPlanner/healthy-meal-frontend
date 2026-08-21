@@ -15,7 +15,7 @@ function RecipeGridCard({ recipe }) {
       onClick={() => navigate(`/recipes/${recipe.id}`)}
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow cursor-pointer"
     >
-      <div className="h-44 overflow-hidden">
+      <div className="h-36 sm:h-40 overflow-hidden">
         <RecipeImage
           src={recipe.imageUrl}
           alt={recipe.name}
