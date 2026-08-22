@@ -304,13 +304,27 @@ function Sidebar() {
                 `
               }
             >
-              <img
-                src={iconSrc}
-                alt={label}
-                className="w-5 h-5 object-contain"
-              />
-
-              <span>{label}</span>
+              {({ isActive }) => (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className={`w-5 h-5 inline-block transition-colors ${
+                      isActive ? "bg-primary" : "bg-slate-400"
+                    }`}
+                    style={{
+                      WebkitMaskImage: `url(${iconSrc})`,
+                      maskImage: `url(${iconSrc})`,
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                    }}
+                  />
+                  <span>{label}</span>
+                </>
+              )}
             </NavLink>
           )
         )}
@@ -577,4 +591,4 @@ function Sidebar() {
   );
 }
 
-export default Sidebar;
+export default Sideba
