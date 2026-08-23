@@ -22,6 +22,13 @@ import Home from "../pages/Home/Home";
 import Explore from "../pages/Explore/Explore";
 import ChatAI from "../pages/ChatAI/ChatAI";
 
+import DietitiansList from "../pages/dietitians/DietitiansList";
+import DoctorProfile from "../pages/dietitians/DoctorProfile";
+import Payment from "../pages/dietitians/Payment";
+import AppointmentConfirmed from "../pages/dietitians/AppointmentConfirmed";
+
+import ProSubscription from "../pages/subscription/ProSubscription";
+
 import ProtectedRoute from "./ProtectedRoute";
 
 function AppRoutes() {
@@ -66,17 +73,28 @@ function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          <Route path="/home" element={<Home />} />
 
+          {/* Home */}
+          <Route
+            path="/home"
+            element={<Home />}
+          />
+
+          {/* Explore */}
           <Route
             path="/explore"
             element={<Explore />}
           />
 
+          {/* Chat AI */}
           <Route
             path="/chat-ai"
             element={<ChatAI />}
           />
+
+          {/* =========================
+              Recipes
+          ========================= */}
 
           <Route
             path="/recipes"
@@ -98,10 +116,48 @@ function AppRoutes() {
             element={<RecipeComplete />}
           />
 
+          {/* =========================
+              Profile
+          ========================= */}
+
           <Route
             path="/profile"
             element={<Profile />}
           />
+
+          {/* =========================
+              Dietitians
+          ========================= */}
+
+          <Route
+            path="/dietitians"
+            element={<DietitiansList />}
+          />
+
+          <Route
+            path="/dietitians/:id"
+            element={<DoctorProfile />}
+          />
+
+          <Route
+            path="/dietitians/:id/payment"
+            element={<Payment />}
+          />
+
+          <Route
+            path="/dietitians/:id/confirmation"
+            element={<AppointmentConfirmed />}
+          />
+
+          {/* =========================
+              Subscription
+          ========================= */}
+
+          <Route
+            path="/subscription"
+            element={<ProSubscription />}
+          />
+
         </Route>
       </Route>
 
