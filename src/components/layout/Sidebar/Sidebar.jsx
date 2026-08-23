@@ -591,4 +591,4 @@ function Sidebar() {
   );
 }
 
-export default Sideba
+export default Sidebar
