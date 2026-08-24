@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { HiSparkles } from "react-icons/hi2";
 
 function ConsultationBanner() {
+  const navigate = useNavigate();
+
   return (
     <div className="relative w-full max-w-[335px] h-[38px] mx-auto bg-white/60 border border-primary/30 rounded-2xl px-3 flex items-center justify-between mb-5
       lg:max-w-none lg:h-auto lg:mx-0 lg:bg-primary-light/60 lg:px-8 lg:py-6 lg:mb-10 lg:flex-row lg:items-center lg:gap-8">
@@ -17,8 +20,11 @@ function ConsultationBanner() {
         </p>
       </div>
 
-      <button className="bg-primary hover:bg-primary-dark active:bg-primary-dark text-white text-[10px] font-semibold px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 transition-colors
-        lg:text-sm lg:px-6 lg:py-3.5 lg:rounded-xl">
+      <button
+        onClick={() => navigate("/dietitians")}
+        className="bg-primary hover:bg-primary-dark active:bg-primary-dark text-white text-[10px] font-semibold px-3 py-1.5 rounded-full whitespace-nowrap flex-shrink-0 transition-colors
+        lg:text-sm lg:px-6 lg:py-3.5 lg:rounded-xl"
+      >
         Book Now
       </button>
     </div>
