@@ -32,7 +32,7 @@ const parseResponse = async (response, defaultMessage) => {
 // =========================
 export const registerUser = async (userData) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/register`,
+    `${API_URL}/Auth/register`,
     {
       method: "POST",
       headers: {
@@ -53,7 +53,7 @@ export const registerUser = async (userData) => {
 // =========================
 export const loginUser = async (loginData) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/login`,
+    `${API_URL}/Auth/login`,
     {
       method: "POST",
       headers: {
@@ -76,7 +76,7 @@ export const loginUser = async (loginData) => {
 // =========================
 export const forgotPassword = async (email) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/forgot-password`,
+    `${API_URL}/Auth/forgot-password`,
     {
       method: "POST",
       headers: {
@@ -99,7 +99,7 @@ export const forgotPassword = async (email) => {
 // =========================
 export const verifyOTP = async (email, otp) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/verify-otp`,
+    `${API_URL}/Auth/verify-otp`,
     {
       method: "POST",
       headers: {
@@ -128,7 +128,7 @@ export const resetPassword = async (
   confirmNewPassword
 ) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/reset-password`,
+    `${API_URL}/Auth/reset-password`,
     {
       method: "POST",
       headers: {
@@ -154,7 +154,7 @@ export const resetPassword = async (
 // =========================
 export const googleLogin = async (idToken) => {
   const response = await fetch(
-    `${API_URL}/api/Auth/google-login`,
+    `${API_URL}/Auth/google-login`,
     {
       method: "POST",
       headers: {
