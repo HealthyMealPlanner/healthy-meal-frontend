@@ -1,25 +1,16 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaLeaf, FaUserMd } from "react-icons/fa";
 
 const actions = [
   { label: "Diet Plans", icon: FaLeaf, path: "/explore" },
-  { label: "Book Doctor", icon: FaUserMd, path: null },
+  { label: "Book Doctor", icon: FaUserMd, path: "/dietitians" },
 ];
 
 function QuickActions() {
   const navigate = useNavigate();
-  const [comingSoonLabel, setComingSoonLabel] = useState(null);
 
   const handleClick = (item) => {
-    if (item.path) {
-      navigate(item.path);
-      return;
-    }
-
-    // الصفحة دي لسه مش متاحة في المشروع
-    setComingSoonLabel(item.label);
-    setTimeout(() => setComingSoonLabel(null), 2000);
+    navigate(item.path);
   };
 
   return (
@@ -40,12 +31,6 @@ function QuickActions() {
           </button>
         ))}
       </div>
-
-      {comingSoonLabel && (
-        <p className="mt-2 text-xs text-slate">
-          {comingSoonLabel} is coming soon.
-        </p>
-      )}
     </div>
   );
 }
